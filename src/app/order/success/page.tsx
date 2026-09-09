@@ -1,25 +1,23 @@
+"use client";
+
 import Link from "next/link";
 import {
   ArrowRight,
   Check,
   PackageCheck,
 } from "lucide-react";
+import { useSearchParams } from "next/navigation";
+import { Suspense } from "react";
 
 import styles from "./Success.module.css";
 
-type OrderSuccessPageProps = {
-  searchParams: Promise<{
-    order?: string;
-  }>;
-};
-
-export default async function OrderSuccessPage({
-  searchParams,
-}: OrderSuccessPageProps) {
-  const params = await searchParams;
+function OrderSuccessContent() {
+  const searchParams =
+    useSearchParams();
 
   const reference =
-    params.order?.trim() || "VI2";
+    searchParams.get("order") ??
+    "VI2";
 
   return (
     <main className={styles.page}>
@@ -42,8 +40,7 @@ export default async function OrderSuccessPage({
 
       <p>
         Your order has been received.
-        Keep the reference below for
-        your records.
+        Keep the reference below for your records.
       </p>
 
       <div className={styles.reference}>
@@ -68,8 +65,7 @@ export default async function OrderSuccessPage({
           </strong>
 
           <span>
-            Your order is ready for
-            the next fulfillment step.
+            Your order is ready for the next fulfillment step.
           </span>
         </div>
       </div>
@@ -77,7 +73,9 @@ export default async function OrderSuccessPage({
       <div className={styles.actions}>
         <Link
           href="/shop"
-          className={styles.primary}
+          className={
+            styles.primary
+          }
         >
           CONTINUE SHOPPING
 
@@ -89,11 +87,52 @@ export default async function OrderSuccessPage({
 
         <Link
           href="/"
-          className={styles.secondary}
+          className={
+            styles.secondary
+          }
         >
           BACK HOME
         </Link>
       </div>
     </main>
+  );
+}
+
+function SuccessFallback() {
+  return (
+    <main className={styles.page}>
+      <div className={styles.mark}>
+        <Check
+          size={34}
+          strokeWidth={1.4}
+        />
+      </div>
+
+      <span className={styles.eyebrow}>
+        ORDER CONFIRMED
+      </span>
+
+      <h1>
+        THANK
+        <br />
+        YOU.
+      </h1>
+
+      <p>
+        Loading your order confirmation...
+      </p>
+    </main>
+  );
+}
+
+export default function OrderSuccessPage() {
+  return (
+    <Suspense
+      fallback={
+        <SuccessFallback />
+      }
+    >
+      <OrderSuccessContent />
+    </Suspense>
   );
 }

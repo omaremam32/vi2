@@ -262,7 +262,7 @@
   margin-top: 22px;
 
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(2, 1fr);
 
   gap: 9px;
 }
@@ -1007,5 +1007,190 @@
 
   .mobilePlaceOrder button:disabled {
     opacity: 0.55;
+  }
+}
+
+
+.codNotice {
+  margin-top: 10px;
+  padding: 11px 12px;
+
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+
+  color: #6d675f;
+  background: #f2eae0;
+
+  font-size: 8px;
+  line-height: 1.55;
+}
+
+.codNotice svg {
+  flex: 0 0 auto;
+
+  margin-top: 1px;
+}
+
+
+/* ============================================================
+   SARAH BATCH 3 — ADDRESS UX + COD READINESS
+   ============================================================ */
+
+.addressTools {
+  margin-top: 14px;
+
+  padding-top: 14px;
+
+  border-top:
+    1px solid
+    rgba(24, 25, 22, 0.11);
+}
+
+.addressActions {
+  display: grid;
+  grid-template-columns:
+    repeat(2, 1fr);
+
+  gap: 7px;
+}
+
+.addressActions button {
+  min-height: 42px;
+
+  padding: 0 10px;
+
+  border:
+    1px solid
+    rgba(24, 25, 22, 0.18);
+
+  color: #181916;
+  background: #f8f4ee;
+
+  cursor: pointer;
+
+  font-size: 7px;
+  font-weight: 800;
+  letter-spacing: 0.07em;
+}
+
+.addressActions button:disabled {
+  opacity: 0.38;
+  cursor: not-allowed;
+}
+
+.saveAddress {
+  min-height: 42px;
+
+  margin-top: 8px;
+
+  display: flex;
+  align-items: center;
+
+  gap: 8px;
+
+  color: #6e6860;
+
+  cursor: pointer;
+
+  font-size: 7px;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+}
+
+.saveAddress input {
+  width: 15px;
+  height: 15px;
+
+  accent-color: #5f664e;
+}
+
+.addressReady,
+.addressError {
+  min-height: 36px;
+
+  margin-top: 6px;
+  padding: 0 11px;
+
+  display: flex;
+  align-items: center;
+
+  font-size: 7px;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+}
+
+.addressReady {
+  color: #546044;
+  background:
+    rgba(96, 111, 73, 0.12);
+}
+
+.addressError {
+  color: #8a5543;
+  background:
+    rgba(158, 93, 68, 0.1);
+}
+
+.localMarketNotice {
+  margin-top: 9px;
+  padding: 11px 12px;
+
+  display: flex;
+  align-items: flex-start;
+
+  gap: 8px;
+
+  color: #69635b;
+  background: #eee7dd;
+
+  font-size: 8px;
+  line-height: 1.55;
+}
+
+.localMarketNotice svg {
+  flex: 0 0 auto;
+
+  margin-top: 1px;
+}
+
+.codNotice > div {
+  display: flex;
+  flex-direction: column;
+
+  gap: 4px;
+}
+
+.codNotice strong {
+  color: #181916;
+
+  font-size: 7px;
+  letter-spacing: 0.08em;
+}
+
+.codNotice button {
+  width: fit-content;
+  min-height: 32px;
+
+  margin-top: 5px;
+  padding: 0 10px;
+
+  border:
+    1px solid
+    rgba(24, 25, 22, 0.22);
+
+  color: #181916;
+  background: #f8f4ee;
+
+  cursor: pointer;
+
+  font-size: 6px;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+}
+
+@media (max-width: 700px) {
+  .addressActions {
+    grid-template-columns: 1fr;
   }
 }

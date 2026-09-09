@@ -283,3 +283,37 @@
     height: 32px;
   }
 }
+
+
+.stockLine {
+  min-height: 18px;
+
+  margin-top: 8px;
+
+  display: flex;
+  align-items: center;
+  gap: 6px;
+
+  color: #697153;
+
+  font-size: 7px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+}
+
+.stockLine > span {
+  width: 5px;
+  height: 5px;
+
+  border-radius: 50%;
+
+  background: #697153;
+}
+
+.stockLine > span.lowStock {
+  background: #9c654e;
+}
+
+.stockLine:has(.lowStock) {
+  color: #9c654e;
+}

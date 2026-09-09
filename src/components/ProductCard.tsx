@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import {
   Plus,
@@ -7,6 +8,7 @@ import {
 } from "lucide-react";
 
 import type { Product } from "@/types/product";
+import { getStockLabel } from "@/lib/catalogMeta";
 import { useCart } from "@/context/CartContext";
 import styles from "./ProductCard.module.css";
 
@@ -34,11 +36,11 @@ export default function ProductCard({
           </span>
         )}
 
-        <img
+        <Image
           src={product.image}
           alt={product.name}
-          loading="lazy"
-          decoding="async"
+          width={700}
+          height={800}
           className={styles.image}
         />
       </Link>
@@ -75,6 +77,17 @@ export default function ProductCard({
             .filter(Boolean)
             .join(" · ")}
         </p>
+
+        <div className={styles.stockLine}>
+          <span
+            className={
+              product.stock <= 8
+                ? styles.lowStock
+                : ""
+            }
+          />
+          {getStockLabel(product)}
+        </div>
 
         <div className={styles.bottom}>
           <div className={styles.price}>

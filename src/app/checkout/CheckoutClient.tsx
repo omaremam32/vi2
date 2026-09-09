@@ -10,10 +10,12 @@ import {
   Landmark,
   PackageCheck,
   ShieldCheck,
+  Smartphone,
   Truck,
   WalletCards,
 } from "lucide-react";
 import {
+  useEffect,
   useMemo,
   useRef,
   useState,
@@ -40,7 +42,9 @@ type CheckoutItem = {
 type PaymentMethod =
   | "cod"
   | "card"
-  | "instapay";
+  | "instapay"
+  | "vodafone"
+  | "etisalat";
 
 const governorates = [
   "Cairo",
@@ -210,6 +214,139 @@ export default function CheckoutClient() {
     setSummaryOpen,
   ] = useState(false);
 
+  const [
+    phoneValue,
+    setPhoneValue,
+  ] = useState("");
+
+  const [
+    codPhoneReady,
+    setCodPhoneReady,
+  ] = useState(false);
+
+  const [
+    governorateValue,
+    setGovernorateValue,
+  ] = useState("");
+
+  const [
+    areaValue,
+    setAreaValue,
+  ] = useState("");
+
+  const [
+    addressValue,
+    setAddressValue,
+  ] = useState("");
+
+  const [
+    addressStatus,
+    setAddressStatus,
+  ] = useState<
+    "idle" | "ready" | "error"
+  >("idle");
+
+  const [
+    savedAddressAvailable,
+    setSavedAddressAvailable,
+  ] = useState(false);
+
+  const [
+    saveAddress,
+    setSaveAddress,
+  ] = useState(true);
+
+  useEffect(() => {
+    try {
+      const raw =
+        window.localStorage.getItem(
+          "vi2-saved-address",
+        );
+
+      setSavedAddressAvailable(
+        Boolean(raw),
+      );
+    } catch {
+      setSavedAddressAvailable(
+        false,
+      );
+    }
+  }, []);
+
+  function fillSavedAddress() {
+    try {
+      const raw =
+        window.localStorage.getItem(
+          "vi2-saved-address",
+        );
+
+      if (!raw) {
+        return;
+      }
+
+      const saved =
+        JSON.parse(raw) as {
+          governorate?: string;
+          area?: string;
+          address?: string;
+        };
+
+      setGovernorateValue(
+        saved.governorate ?? "",
+      );
+
+      setAreaValue(
+        saved.area ?? "",
+      );
+
+      setAddressValue(
+        saved.address ?? "",
+      );
+
+      setAddressStatus(
+        "ready",
+      );
+    } catch {
+      setAddressStatus(
+        "error",
+      );
+    }
+  }
+
+  function checkAddressDetails() {
+    const ready =
+      governorateValue.trim().length >
+        0 &&
+      areaValue.trim().length >= 2 &&
+      addressValue.trim().length >= 8;
+
+    setAddressStatus(
+      ready
+        ? "ready"
+        : "error",
+    );
+  }
+
+  function checkCodPhone() {
+    setPhoneError("");
+
+    if (
+      !isValidEgyptPhone(
+        phoneValue,
+      )
+    ) {
+      setCodPhoneReady(false);
+
+      setPhoneError(
+        "Enter a valid Egyptian mobile number first.",
+      );
+
+      return;
+    }
+
+    setCodPhoneReady(true);
+  }
+
   function submitFromMobileBar() {
     formRef.current?.requestSubmit();
   }
@@ -346,6 +483,25 @@ export default function CheckoutClient() {
       "vi2-last-order",
       JSON.stringify(order),
     );
+
+    if (saveAddress) {
+      try {
+        window.localStorage.setItem(
+          "vi2-saved-address",
+          JSON.stringify({
+            governorate,
+            area,
+            address,
+          }),
+        );
+
+        setSavedAddressAvailable(
+          true,
+        );
+      } catch {
+        // Checkout should not fail if local storage is unavailable.
+      }
+    }
 
     if (!buyNowProduct) {
       clearCart();
@@ -656,11 +812,17 @@ export default function CheckoutClient() {
                       inputMode="tel"
                       autoComplete="tel"
                       placeholder="01012345678"
-                      onChange={() =>
-                        setPhoneError(
-                          "",
-                        )
-                      }
+                      value={phoneValue}
+                      onChange={(event) => {
+                        setPhoneValue(
+                          event.target.value,
+                        );
+
+                        setPhoneError("");
+                        setCodPhoneReady(
+                          false,
+                        );
+                      }}
                     />
 
                     {phoneError && (
@@ -735,7 +897,16 @@ export default function CheckoutClient() {
 
                     <select
                       name="governorate"
-                      defaultValue=""
+                      value={governorateValue}
+                      onChange={(event) => {
+                        setGovernorateValue(
+                          event.target.value,
+                        );
+
+                        setAddressStatus(
+                          "idle",
+                        );
+                      }}
                     >
                       <option
                         value=""
@@ -775,6 +946,16 @@ export default function CheckoutClient() {
                       type="text"
                       autoComplete="address-level2"
                       placeholder="Area / district"
+                      value={areaValue}
+                      onChange={(event) => {
+                        setAreaValue(
+                          event.target.value,
+                        );
+
+                        setAddressStatus(
+                          "idle",
+                        );
+                      }}
                     />
                   </label>
 
@@ -792,6 +973,16 @@ export default function CheckoutClient() {
                       type="text"
                       autoComplete="street-address"
                       placeholder="Building, street, floor and apartment"
+                      value={addressValue}
+                      onChange={(event) => {
+                        setAddressValue(
+                          event.target.value,
+                        );
+
+                        setAddressStatus(
+                          "idle",
+                        );
+                      }}
                     />
                   </label>
 
@@ -810,6 +1001,100 @@ export default function CheckoutClient() {
                       placeholder="Optional instructions"
                     />
                   </label>
+                </div>
+
+                <div
+                  className={
+                    styles.addressTools
+                  }
+                >
+                  <div
+                    className={
+                      styles.addressActions
+                    }
+                  >
+                    <button
+                      type="button"
+                      disabled={
+                        !savedAddressAvailable
+                      }
+                      onClick={
+                        fillSavedAddress
+                      }
+                    >
+                      USE SAVED ADDRESS
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={
+                        checkAddressDetails
+                      }
+                    >
+                      CHECK ADDRESS
+                    </button>
+                  </div>
+
+                  <label
+                    className={
+                      styles.saveAddress
+                    }
+                  >
+                    <input
+                      type="checkbox"
+                      checked={
+                        saveAddress
+                      }
+                      onChange={(event) =>
+                        setSaveAddress(
+                          event.target
+                            .checked,
+                        )
+                      }
+                    />
+
+                    <span>
+                      SAVE THIS ADDRESS ON
+                      THIS DEVICE
+                    </span>
+                  </label>
+
+                  {addressStatus !==
+                    "idle" && (
+                    <div
+                      className={
+                        addressStatus ===
+                        "ready"
+                          ? styles.addressReady
+                          : styles.addressError
+                      }
+                    >
+                      {addressStatus ===
+                      "ready"
+                        ? "ADDRESS DETAILS READY"
+                        : "COMPLETE GOVERNORATE, AREA AND FULL ADDRESS"}
+                    </div>
+                  )}
+
+                  <div
+                    className={
+                      styles.localMarketNotice
+                    }
+                  >
+                    <ShieldCheck
+                      size={14}
+                      strokeWidth={1.4}
+                    />
+
+                    <span>
+                      All customer prices are
+                      shown in EGP. Vi2 handles
+                      supplier/import costs before
+                      checkout, so there are no
+                      surprise international duties
+                      added to this order.
+                    </span>
+                  </div>
                 </div>
               </div>
             </section>
@@ -932,8 +1217,7 @@ export default function CheckoutClient() {
                       </strong>
 
                       <span>
-                        Visa /
-                        Mastercard
+                        Visa / Mastercard / Meeza
                       </span>
                     </div>
 
@@ -991,7 +1275,132 @@ export default function CheckoutClient() {
                       />
                     )}
                   </label>
+
+                  <label
+                    className={
+                      paymentMethod ===
+                      "vodafone"
+                        ? styles.paymentSelected
+                        : ""
+                    }
+                  >
+                    <input
+                      type="radio"
+                      name="payment"
+                      value="vodafone"
+                      checked={
+                        paymentMethod ===
+                        "vodafone"
+                      }
+                      onChange={() =>
+                        setPaymentMethod(
+                          "vodafone",
+                        )
+                      }
+                    />
+
+                    <Smartphone
+                      size={19}
+                      strokeWidth={1.45}
+                    />
+
+                    <div>
+                      <strong>
+                        MOBILE WALLET
+                      </strong>
+
+                      <span>
+                        Vodafone Cash
+                      </span>
+                    </div>
+
+                    {paymentMethod ===
+                      "vodafone" && (
+                      <Check
+                        size={16}
+                      />
+                    )}
+                  </label>
+
+                  <label
+                    className={
+                      paymentMethod ===
+                      "etisalat"
+                        ? styles.paymentSelected
+                        : ""
+                    }
+                  >
+                    <input
+                      type="radio"
+                      name="payment"
+                      value="etisalat"
+                      checked={
+                        paymentMethod ===
+                        "etisalat"
+                      }
+                      onChange={() =>
+                        setPaymentMethod(
+                          "etisalat",
+                        )
+                      }
+                    />
+
+                    <Smartphone
+                      size={19}
+                      strokeWidth={1.45}
+                    />
+
+                    <div>
+                      <strong>
+                        MOBILE WALLET
+                      </strong>
+
+                      <span>
+                        Etisalat Cash
+                      </span>
+                    </div>
+
+                    {paymentMethod ===
+                      "etisalat" && (
+                      <Check
+                        size={16}
+                      />
+                    )}
+                  </label>
                 </div>
+
+                {paymentMethod === "cod" && (
+                  <div className={styles.codNotice}>
+                    <ShieldCheck
+                      size={15}
+                      strokeWidth={1.45}
+                    />
+
+                    <div>
+                      <strong>
+                        COD MOBILE VERIFICATION
+                      </strong>
+
+                      <span>
+                        SMS / WhatsApp OTP can use
+                        the mobile number entered
+                        above before final COD
+                        confirmation.
+                      </span>
+
+                      <button
+                        type="button"
+                        onClick={
+                          checkCodPhone
+                        }
+                      >
+                        {codPhoneReady
+                          ? "NUMBER READY"
+                          : "CHECK MOBILE NUMBER"}
+                      </button>
+                    </div>
+                  </div>
+                )}
 
                 {error && (
                   <p
@@ -1277,8 +1686,9 @@ export default function CheckoutClient() {
                 />
 
                 <span>
-                  Delivery across
-                  Egypt.
+                  Greater Cairo: estimated 1–3 business
+                  days. Governorates: estimated 2–5
+                  business days.
                 </span>
               </div>
             </div>

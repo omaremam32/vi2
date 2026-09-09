@@ -169,7 +169,7 @@ export const products: Product[] = [
     rating: 4.8,
     reviewCount: 2798,
     image:
-      "https://s3.images-iherb.com/now/now01662/u/22.jpg",
+      "/products/categories/ultra-omega-3-transparent.png",
     size: "180 Softgels",
     stock: 16,
     badge: "Premium",

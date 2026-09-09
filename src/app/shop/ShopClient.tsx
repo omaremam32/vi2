@@ -1,6 +1,7 @@
 "use client";
 
 import {
+  ChevronDown,
   Search,
   SlidersHorizontal,
   X,
@@ -14,6 +15,14 @@ import {
 
 import ProductCard from "@/components/ProductCard";
 import { products } from "@/data/products";
+import {
+  getProductForm,
+  getProductHealthGoals,
+  healthGoals,
+  matchesForm,
+  matchesGoal,
+  productForms,
+} from "@/lib/catalogMeta";
 
 import styles from "./Shop.module.css";
 
@@ -34,6 +43,29 @@ const brands = [
   ).sort(),
 ];
 
+const popularSearches = [
+  "Creatine",
+  "Protein",
+  "Vitamin D3",
+  "Magnesium",
+  "Omega-3",
+  "Ashwagandha",
+];
+
+const dietaryOptions = [
+  "All Diets",
+  "Vegan",
+  "Keto",
+  "Non-GMO",
+];
+
+const allergenOptions = [
+  "All Allergen Filters",
+  "Gluten-Free",
+  "Dairy-Free",
+  "Soy-Free",
+];
+
 type SortValue =
   | "featured"
   | "price-low"
@@ -46,25 +78,79 @@ export default function ShopClient() {
   const requestedCategory =
     searchParams.get("category");
 
+  const requestedGoal =
+    searchParams.get("goal");
+
+  const requestedBrand =
+    searchParams.get("brand");
+
+  const requestedSearch =
+    searchParams.get("q") ?? "";
+
   const validRequestedCategory =
     requestedCategory &&
     categories.includes(requestedCategory)
       ? requestedCategory
       : "All";
 
-  const [search, setSearch] = useState("");
+  const validRequestedGoal =
+    requestedGoal &&
+    healthGoals.includes(
+      requestedGoal as (typeof healthGoals)[number],
+    )
+      ? requestedGoal
+      : "All Goals";
+
+  const validRequestedBrand =
+    requestedBrand &&
+    brands.includes(requestedBrand)
+      ? requestedBrand
+      : "All Brands";
+
+  const [search, setSearch] =
+    useState(requestedSearch);
   const [category, setCategory] =
     useState(validRequestedCategory);
 
+  const [goal, setGoal] =
+    useState(validRequestedGoal);
+
   const [brand, setBrand] =
-    useState("All Brands");
+    useState(validRequestedBrand);
+
+  const [form, setForm] =
+    useState("All Forms");
+
+  const [availabilityOnly, setAvailabilityOnly] =
+    useState(false);
+
+  const [diet, setDiet] =
+    useState("All Diets");
+
+  const [allergen, setAllergen] =
+    useState("All Allergen Filters");
 
   const [sort, setSort] =
     useState<SortValue>("featured");
 
+  const [mobileFiltersOpen, setMobileFiltersOpen] =
+    useState(false);
+
+  useEffect(() => {
+    setSearch(requestedSearch);
+  }, [requestedSearch]);
+
   useEffect(() => {
     setCategory(validRequestedCategory);
   }, [validRequestedCategory]);
+
+  useEffect(() => {
+    setGoal(validRequestedGoal);
+  }, [validRequestedGoal]);
+
+  useEffect(() => {
+    setBrand(validRequestedBrand);
+  }, [validRequestedBrand]);
 
   const filteredProducts = useMemo(() => {
     const normalizedSearch =
@@ -87,6 +173,8 @@ export default function ShopClient() {
           product.category,
           product.flavor ?? "",
           product.size ?? "",
+          getProductForm(product),
+          ...getProductHealthGoals(product),
         ]
           .join(" ")
           .toLowerCase();
@@ -97,10 +185,17 @@ export default function ShopClient() {
             normalizedSearch,
           );
 
+        const matchesAvailability =
+          !availabilityOnly ||
+          product.stock > 0;
+
         return (
           matchesCategory &&
           matchesBrand &&
-          matchesSearch
+          matchesSearch &&
+          matchesGoal(product, goal) &&
+          matchesForm(product, form) &&
+          matchesAvailability
         );
       },
     );
@@ -127,8 +222,11 @@ export default function ShopClient() {
 
     return result;
   }, [
+    availabilityOnly,
     brand,
     category,
+    form,
+    goal,
     search,
     sort,
   ]);
@@ -136,15 +234,189 @@ export default function ShopClient() {
   function clearFilters() {
     setSearch("");
     setCategory("All");
+    setGoal("All Goals");
     setBrand("All Brands");
+    setForm("All Forms");
+    setAvailabilityOnly(false);
+    setDiet("All Diets");
+    setAllergen("All Allergen Filters");
     setSort("featured");
   }
 
   const hasActiveFilters =
     search.trim().length > 0 ||
     category !== "All" ||
+    goal !== "All Goals" ||
     brand !== "All Brands" ||
+    form !== "All Forms" ||
+    diet !== "All Diets" ||
+    allergen !== "All Allergen Filters" ||
+    availabilityOnly ||
     sort !== "featured";
+
+  const filterContent = (
+    <>
+      <div className={styles.filterGroup}>
+        <div className={styles.filterTitle}>
+          HEALTH GOAL
+        </div>
+
+        <div className={styles.filterOptions}>
+          {healthGoals.map((item) => (
+            <button
+              key={item}
+              type="button"
+              className={
+                goal === item
+                  ? styles.filterActive
+                  : ""
+              }
+              onClick={() => setGoal(item)}
+            >
+              <span>{item}</span>
+
+              {item !== "All Goals" && (
+                <small>
+                  {
+                    products.filter((product) =>
+                      matchesGoal(product, item),
+                    ).length
+                  }
+                </small>
+              )}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      <div className={styles.filterGroup}>
+        <div className={styles.filterTitle}>
+          CATEGORY
+        </div>
+
+        <div className={styles.filterOptions}>
+          {categories.map((item) => (
+            <button
+              key={item}
+              type="button"
+              className={
+                category === item
+                  ? styles.filterActive
+                  : ""
+              }
+              onClick={() => setCategory(item)}
+            >
+              <span>{item}</span>
+            </button>
+          ))}
+        </div>
+      </div>
+
+      <div className={styles.filterGroup}>
+        <label className={styles.filterSelect}>
+          <span>BRAND</span>
+
+          <select
+            value={brand}
+            onChange={(event) =>
+              setBrand(event.target.value)
+            }
+          >
+            {brands.map((item) => (
+              <option key={item}>
+                {item}
+              </option>
+            ))}
+          </select>
+        </label>
+      </div>
+
+      <div className={styles.filterGroup}>
+        <label className={styles.filterSelect}>
+          <span>FORM</span>
+
+          <select
+            value={form}
+            onChange={(event) =>
+              setForm(event.target.value)
+            }
+          >
+            {productForms.map((item) => (
+              <option key={item}>
+                {item}
+              </option>
+            ))}
+          </select>
+        </label>
+      </div>
+
+      <div className={styles.filterGroup}>
+        <label className={styles.filterSelect}>
+          <span>DIET</span>
+
+          <select
+            value={diet}
+            onChange={(event) =>
+              setDiet(event.target.value)
+            }
+          >
+            {dietaryOptions.map((item) => (
+              <option key={item}>
+                {item}
+              </option>
+            ))}
+          </select>
+        </label>
+
+        {diet !== "All Diets" && (
+          <p className={styles.metadataNotice}>
+            Verified dietary attributes must be
+            supplied per SKU before launch.
+          </p>
+        )}
+      </div>
+
+      <div className={styles.filterGroup}>
+        <label className={styles.filterSelect}>
+          <span>ALLERGEN-FREE</span>
+
+          <select
+            value={allergen}
+            onChange={(event) =>
+              setAllergen(event.target.value)
+            }
+          >
+            {allergenOptions.map((item) => (
+              <option key={item}>
+                {item}
+              </option>
+            ))}
+          </select>
+        </label>
+
+        {allergen !== "All Allergen Filters" && (
+          <p className={styles.metadataNotice}>
+            Verified manufacturer allergen data
+            is required per SKU before launch.
+          </p>
+        )}
+      </div>
+
+      <label className={styles.checkFilter}>
+        <input
+          type="checkbox"
+          checked={availabilityOnly}
+          onChange={(event) =>
+            setAvailabilityOnly(
+              event.target.checked,
+            )
+          }
+        />
+
+        <span>IN STOCK ONLY</span>
+      </label>
+    </>
+  );
 
   return (
     <main className={styles.page}>
@@ -157,9 +429,9 @@ export default function ShopClient() {
           <h1>SHOP</h1>
 
           <p>
-            Supplements and wellness essentials,
-            organized for a faster, simpler way
-            to shop.
+            Search by product, brand, category or
+            health goal — then narrow the catalog
+            without slowing down the buying flow.
           </p>
         </div>
 
@@ -182,7 +454,7 @@ export default function ShopClient() {
               onChange={(event) =>
                 setSearch(event.target.value)
               }
-              placeholder="Search products, brands or categories"
+              placeholder="Search products, brands, goals..."
               aria-label="Search products"
             />
 
@@ -192,80 +464,69 @@ export default function ShopClient() {
                 aria-label="Clear search"
                 onClick={() => setSearch("")}
               >
-                <X
-                  size={17}
-                  strokeWidth={1.5}
-                />
+                <X size={17} strokeWidth={1.5} />
               </button>
             )}
           </label>
 
-          <div className={styles.selectGroup}>
-            <label className={styles.selectWrap}>
-              <span>BRAND</span>
+          <button
+            type="button"
+            className={styles.mobileFilterButton}
+            onClick={() =>
+              setMobileFiltersOpen(true)
+            }
+          >
+            <SlidersHorizontal
+              size={16}
+              strokeWidth={1.5}
+            />
 
-              <select
-                value={brand}
-                onChange={(event) =>
-                  setBrand(event.target.value)
-                }
-              >
-                {brands.map((item) => (
-                  <option
-                    key={item}
-                    value={item}
-                  >
-                    {item}
-                  </option>
-                ))}
-              </select>
-            </label>
+            FILTERS
+          </button>
 
-            <label className={styles.selectWrap}>
-              <span>SORT</span>
+          <label className={styles.sortWrap}>
+            <span>SORT</span>
 
-              <select
-                value={sort}
-                onChange={(event) =>
-                  setSort(
-                    event.target
-                      .value as SortValue,
-                  )
-                }
-              >
-                <option value="featured">
-                  Featured
-                </option>
+            <select
+              value={sort}
+              onChange={(event) =>
+                setSort(
+                  event.target.value as SortValue,
+                )
+              }
+            >
+              <option value="featured">
+                Featured
+              </option>
 
-                <option value="price-low">
-                  Price: Low to High
-                </option>
+              <option value="price-low">
+                Price: Low to High
+              </option>
 
-                <option value="price-high">
-                  Price: High to Low
-                </option>
+              <option value="price-high">
+                Price: High to Low
+              </option>
 
-                <option value="rating">
-                  Highest Rated
-                </option>
-              </select>
-            </label>
-          </div>
+              <option value="rating">
+                Highest Rated
+              </option>
+            </select>
+
+            <ChevronDown
+              size={14}
+              strokeWidth={1.5}
+            />
+          </label>
         </div>
 
-        <div className={styles.categories}>
-          {categories.map((item) => (
+        <div className={styles.popularSearches}>
+          <span>POPULAR:</span>
+
+          {popularSearches.map((item) => (
             <button
               key={item}
               type="button"
-              className={
-                category === item
-                  ? styles.categoryActive
-                  : ""
-              }
-              onClick={() =>
-                setCategory(item)
-              }
+              onClick={() => setSearch(item)}
             >
               {item}
             </button>
@@ -273,66 +534,141 @@ export default function ShopClient() {
         </div>
       </section>
 
-      <section className={styles.results}>
-        <div className={styles.resultsTop}>
-          <div className={styles.resultCount}>
-            <SlidersHorizontal
-              size={15}
-              strokeWidth={1.5}
-            />
+      <section className={styles.catalogLayout}>
+        <aside className={styles.sidebar}>
+          <div className={styles.sidebarTop}>
+            <strong>FILTER</strong>
 
-            <span>
-              {filteredProducts.length}{" "}
-              {filteredProducts.length === 1
-                ? "PRODUCT"
-                : "PRODUCTS"}
-            </span>
-          </div>
-
-          {hasActiveFilters && (
-            <button
-              type="button"
-              className={styles.clearButton}
-              onClick={clearFilters}
-            >
-              CLEAR FILTERS
-            </button>
-          )}
-        </div>
-
-        {filteredProducts.length > 0 ? (
-          <div className={styles.grid}>
-            {filteredProducts.map(
-              (product) => (
-                <ProductCard
-                  key={product.id}
-                  product={product}
-                />
-              ),
+            {hasActiveFilters && (
+              <button
+                type="button"
+                onClick={clearFilters}
+              >
+                RESET
+              </button>
             )}
           </div>
-        ) : (
-          <div className={styles.empty}>
-            <span>NO MATCHES</span>
 
-            <h2>
-              Nothing found.
-            </h2>
+          {filterContent}
+        </aside>
 
-            <p>
-              Try another product name,
-              category or brand.
-            </p>
+        <div className={styles.productsArea}>
+          <div className={styles.resultsTop}>
+            <div className={styles.resultCount}>
+              <span>
+                {filteredProducts.length}{" "}
+                {filteredProducts.length === 1
+                  ? "PRODUCT"
+                  : "PRODUCTS"}
+              </span>
+            </div>
+
+            <div className={styles.activeSummary}>
+              {goal !== "All Goals" && (
+                <span>{goal}</span>
+              )}
+
+              {category !== "All" && (
+                <span>{category}</span>
+              )}
+
+              {form !== "All Forms" && (
+                <span>{form}</span>
+              )}
+
+              {diet !== "All Diets" && (
+                <span>{diet}</span>
+              )}
+
+              {allergen !== "All Allergen Filters" && (
+                <span>{allergen}</span>
+              )}
+            </div>
+          </div>
+
+          {filteredProducts.length > 0 ? (
+            <div className={styles.grid}>
+              {filteredProducts.map(
+                (product) => (
+                  <ProductCard
+                    key={product.id}
+                    product={product}
+                  />
+                ),
+              )}
+            </div>
+          ) : (
+            <div className={styles.empty}>
+              <span>NO MATCHES</span>
+
+              <h2>Nothing found.</h2>
+
+              <p>
+                Try another product, health goal,
+                category or brand.
+              </p>
+
+              <button
+                type="button"
+                onClick={clearFilters}
+              >
+                VIEW ALL PRODUCTS
+              </button>
+            </div>
+          )}
+        </div>
+      </section>
+
+      {mobileFiltersOpen && (
+        <div
+          className={styles.filterBackdrop}
+          role="presentation"
+          onClick={() =>
+            setMobileFiltersOpen(false)
+          }
+        >
+          <aside
+            className={styles.mobileFilters}
+            role="dialog"
+            aria-modal="true"
+            aria-label="Product filters"
+            onClick={(event) =>
+              event.stopPropagation()
+            }
+          >
+            <div className={styles.mobileFiltersHead}>
+              <div>
+                <span>VI2 CATALOG</span>
+                <strong>FILTER PRODUCTS</strong>
+              </div>
+
+              <button
+                type="button"
+                onClick={() =>
+                  setMobileFiltersOpen(false)
+                }
+                aria-label="Close filters"
+              >
+                <X size={20} />
+              </button>
+            </div>
+
+            <div className={styles.mobileFiltersBody}>
+              {filterContent}
+            </div>
 
             <button
               type="button"
-              onClick={clearFilters}
+              className={styles.applyFilters}
+              onClick={() =>
+                setMobileFiltersOpen(false)
+              }
             >
-              VIEW ALL PRODUCTS
+              SHOW {filteredProducts.length} PRODUCTS
             </button>
-          </div>
-        )}
-      </section>
+          </aside>
+        </div>
+      )}
     </main>
   );
 }

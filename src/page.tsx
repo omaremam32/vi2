@@ -11,8 +11,6 @@ import {
 
 import TrendingNow from "@/components/TrendingNow";
 import HomeDiscovery from "@/components/HomeDiscovery";
-import FlashDeals from "@/components/FlashDeals";
-import ValueSets from "@/components/ValueSets";
 
 import styles from "./Home.module.css";
 
@@ -341,16 +339,6 @@ export default function Home() {
           SARAH / IHERB DISCOVERY RENOVATION
           ====================================================== */}
       <HomeDiscovery />
-
-      {/* ======================================================
-          FLASH DEALS
-          ====================================================== */}
-      <FlashDeals />
-
-      {/* ======================================================
-          VALUE SETS / BUNDLES
-          ====================================================== */}
-      <ValueSets />
 
       {/* ======================================================
           TRENDING NOW

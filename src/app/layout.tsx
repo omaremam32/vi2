@@ -1,10 +1,12 @@
 import type { Metadata } from "next";
 import {
   Bebas_Neue,
+  Cairo,
   Inter,
 } from "next/font/google";
 
 import "./globals.css";
+import "./rtl-support.css";
 
 import Providers from "@/components/Providers";
 import Navbar from "@/components/Navbar";
@@ -24,8 +26,18 @@ const inter = Inter({
   display: "swap",
 });
 
+const cairo = Cairo({
+  subsets: [
+    "arabic",
+    "latin",
+  ],
+  variable: "--font-arabic",
+  display: "swap",
+});
+
 export const metadata: Metadata = {
-  title: "Vi2 — Live Well, Live Fully",
+  title:
+    "Vi2 — Live Well, Live Fully",
   description:
     "Dietary, wellness and sports nutrition.",
 };
@@ -38,7 +50,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`${bebasNeue.variable} ${inter.variable}`}
+        className={`${bebasNeue.variable} ${inter.variable} ${cairo.variable}`}
       >
         <Providers>
           <Navbar />

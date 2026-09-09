@@ -1,0 +1,28 @@
+html[dir="rtl"] body {
+  direction: rtl;
+  font-family:
+    var(--font-arabic),
+    var(--font-body),
+    sans-serif;
+}
+
+html[dir="rtl"] input,
+html[dir="rtl"] textarea,
+html[dir="rtl"] select {
+  direction: rtl;
+  text-align: right;
+}
+
+html[dir="rtl"] button,
+html[dir="rtl"] a {
+  font-family:
+    var(--font-arabic),
+    var(--font-body),
+    sans-serif;
+}
+
+html[dir="rtl"] [data-price],
+html[dir="rtl"] [data-order-reference] {
+  direction: ltr;
+  unicode-bidi: isolate;
+}
