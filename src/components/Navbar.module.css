@@ -946,3 +946,83 @@
     width: 7px;
   }
 }
+
+
+/* ============================================================
+   DESKTOP MEGA MENU TRIGGERS
+   ============================================================ */
+
+.categoryTrigger,
+.categoryTriggerActive {
+  min-height: 42px;
+  padding: 0;
+  border: 0;
+  border-bottom: 2px solid transparent;
+  color: #272824;
+  background: transparent;
+  cursor: pointer;
+  font-size: 8px;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+}
+
+.categoryTrigger:hover,
+.categoryTrigger:focus-visible,
+.categoryTriggerActive {
+  border-bottom-color: #646b54;
+  color: #596149;
+}
+
+@media (max-width: 980px) {
+  .categoryTrigger,
+  .categoryTriggerActive {
+    display: none;
+  }
+}
+
+
+/* ============================================================
+   VI2 ACCOUNT DROPDOWN TRIGGER
+   ============================================================ */
+
+.accountWrap {
+  position: relative;
+
+  min-height: 72px;
+
+  display: flex;
+  align-items: center;
+}
+
+.accountWrap .account {
+  min-height: 50px;
+
+  padding: 0 5px;
+
+  border: 0;
+
+  background: transparent;
+
+  cursor: pointer;
+}
+
+.accountChevron {
+  margin-left: 2px;
+
+  opacity: 0.75;
+
+  transition:
+    transform 150ms ease;
+}
+
+.account[aria-expanded="true"]
+  .accountChevron {
+  transform: rotate(180deg);
+}
+
+@media (max-width: 980px) {
+  .accountWrap {
+    display: none;
+  }
+}

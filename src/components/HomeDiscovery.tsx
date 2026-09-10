@@ -58,27 +58,113 @@ const goals = [
   },
 ];
 
-const bestSellers = [...products]
+const bestSellers = [
+  ...products,
+]
   .sort(
     (a, b) =>
-      Number(b.badge === "Best Seller") -
-        Number(a.badge === "Best Seller") ||
-      b.rating - a.rating ||
-      b.reviewCount - a.reviewCount,
+      Number(
+        b.badge ===
+          "Best Seller",
+      ) -
+        Number(
+          a.badge ===
+            "Best Seller",
+        ) ||
+      b.rating -
+        a.rating ||
+      b.reviewCount -
+        a.reviewCount,
   )
   .slice(0, 4);
 
-const brands = Array.from(
-  new Set(products.map((product) => product.brand)),
-).slice(0, 8);
+const brands =
+  Array.from(
+    new Set(
+      products.map(
+        (product) =>
+          product.brand,
+      ),
+    ),
+  ).slice(0, 8);
 
 export default function HomeDiscovery() {
   return (
     <>
-      <section className={styles.goalsSection}>
-        <div className={styles.heading}>
+      {/* ====================================================
+          BEST SELLERS — FIRST SECTION UNDER HERO
+          ==================================================== */}
+      <section
+        className={
+          styles.bestSection
+        }
+      >
+        <div
+          className={
+            styles.compactHeading
+          }
+        >
           <div>
-            <span>SHOP BY HEALTH GOAL</span>
+            <span>
+              POPULAR RIGHT NOW
+            </span>
+
+            <h2>
+              BEST SELLERS
+            </h2>
+          </div>
+
+          <Link
+            href="/shop?sort=rating"
+          >
+            VIEW ALL
+
+            <ArrowRight
+              size={16}
+              strokeWidth={1.5}
+            />
+          </Link>
+        </div>
+
+        <div
+          className={
+            styles.productGrid
+          }
+        >
+          {bestSellers.map(
+            (product) => (
+              <ProductCard
+                key={
+                  product.id
+                }
+                product={
+                  product
+                }
+              />
+            ),
+          )}
+        </div>
+      </section>
+
+      {/* ====================================================
+          HEALTH GOALS
+          ==================================================== */}
+      <section
+        id="health-goals"
+        className={
+          styles.goalsSection
+        }
+      >
+        <div
+          className={
+            styles.heading
+          }
+        >
+          <div>
+            <span>
+              SHOP BY HEALTH GOAL
+            </span>
+
             <h2>
               START WITH
               <br />
@@ -86,76 +172,107 @@ export default function HomeDiscovery() {
             </h2>
           </div>
 
-          <Link href="/categories#health-goals">
-            VIEW ALL
-            <ArrowRight size={16} />
-          </Link>
-        </div>
-
-        <div className={styles.goalGrid}>
-          {goals.map((goal, index) => {
-            const Icon = goal.icon;
-
-            return (
-              <Link
-                key={goal.name}
-                href={`/shop?goal=${encodeURIComponent(
-                  goal.query,
-                )}`}
-                className={styles.goalCard}
-              >
-                <div className={styles.goalTop}>
-                  <span>
-                    {String(index + 1).padStart(2, "0")}
-                  </span>
-                  <Icon
-                    size={24}
-                    strokeWidth={1.35}
-                  />
-                </div>
-
-                <div>
-                  <h3>{goal.name}</h3>
-                  <p>{goal.description}</p>
-                </div>
-
-                <ArrowRight
-                  className={styles.goalArrow}
-                  size={20}
-                  strokeWidth={1.5}
-                />
-              </Link>
-            );
-          })}
-        </div>
-      </section>
-
-      <section className={styles.bestSection}>
-        <div className={styles.heading}>
-          <div>
-            <span>POPULAR RIGHT NOW</span>
-            <h2>BEST SELLERS</h2>
-          </div>
-
           <Link href="/shop">
-            SHOP ALL
-            <ArrowRight size={16} />
+            VIEW ALL
+
+            <ArrowRight
+              size={16}
+            />
           </Link>
         </div>
 
-        <div className={styles.productGrid}>
-          {bestSellers.map((product) => (
-            <ProductCard
-              key={product.id}
-              product={product}
-            />
-          ))}
+        <div
+          className={
+            styles.goalGrid
+          }
+        >
+          {goals.map(
+            (
+              goal,
+              index,
+            ) => {
+              const Icon =
+                goal.icon;
+
+              return (
+                <Link
+                  key={
+                    goal.name
+                  }
+                  href={`/shop?goal=${encodeURIComponent(
+                    goal.query,
+                  )}`}
+                  className={
+                    styles.goalCard
+                  }
+                >
+                  <div
+                    className={
+                      styles.goalTop
+                    }
+                  >
+                    <span>
+                      {String(
+                        index +
+                          1,
+                      ).padStart(
+                        2,
+                        "0",
+                      )}
+                    </span>
+
+                    <Icon
+                      size={24}
+                      strokeWidth={
+                        1.35
+                      }
+                    />
+                  </div>
+
+                  <div>
+                    <h3>
+                      {goal.name}
+                    </h3>
+
+                    <p>
+                      {
+                        goal.description
+                      }
+                    </p>
+                  </div>
+
+                  <ArrowRight
+                    className={
+                      styles.goalArrow
+                    }
+                    size={20}
+                    strokeWidth={
+                      1.5
+                    }
+                  />
+                </Link>
+              );
+            },
+          )}
         </div>
       </section>
 
-      <section className={styles.brandSection}>
-        <div className={styles.brandIntro}>
-          <span>BRANDS AT VI2</span>
+      {/* ====================================================
+          BRANDS
+          ==================================================== */}
+      <section
+        className={
+          styles.brandSection
+        }
+      >
+        <div
+          className={
+            styles.brandIntro
+          }
+        >
+          <span>
+            BRANDS AT VI2
+          </span>
 
           <h2>
             ONE STORE.
@@ -164,52 +281,87 @@ export default function HomeDiscovery() {
           </h2>
 
           <p>
-            Discover Vi2 products alongside selected
-            international supplement brands in one
-            organized catalog.
+            Discover Vi2 products
+            alongside selected
+            international supplement
+            brands in one organized
+            catalog.
           </p>
         </div>
 
-        <div className={styles.brandList}>
-          {brands.map((brand, index) => (
-            <Link
-              key={brand}
-              href={`/shop?brand=${encodeURIComponent(
-                brand,
-              )}`}
-              className={styles.brandItem}
-            >
-              <span>
-                {String(index + 1).padStart(2, "0")}
-              </span>
+        <div
+          className={
+            styles.brandList
+          }
+        >
+          {brands.map(
+            (
+              brand,
+              index,
+            ) => (
+              <Link
+                key={brand}
+                href={`/shop?brand=${encodeURIComponent(
+                  brand,
+                )}`}
+                className={
+                  styles.brandItem
+                }
+              >
+                <span>
+                  {String(
+                    index +
+                      1,
+                  ).padStart(
+                    2,
+                    "0",
+                  )}
+                </span>
 
-              <strong>{brand}</strong>
+                <strong>
+                  {brand}
+                </strong>
 
-              <ArrowRight
-                size={16}
-                strokeWidth={1.5}
-              />
-            </Link>
-          ))}
+                <ArrowRight
+                  size={16}
+                  strokeWidth={
+                    1.5
+                  }
+                />
+              </Link>
+            ),
+          )}
         </div>
       </section>
 
-      <section className={styles.dailyStrip}>
+      <section
+        className={
+          styles.dailyStrip
+        }
+      >
         <div>
-          <span>DAILY DISCOVERY</span>
+          <span>
+            DAILY DISCOVERY
+          </span>
+
           <strong>
-            FIND TODAY&apos;S VI2 PICKS
+            FIND TODAY&apos;S
+            VI2 PICKS
           </strong>
         </div>
 
         <p>
-          A rotating edit of popular wellness and
+          A rotating edit of
+          popular wellness and
           sports-nutrition products.
         </p>
 
         <Link href="/shop">
           EXPLORE
-          <ArrowRight size={16} />
+
+          <ArrowRight
+            size={16}
+          />
         </Link>
       </section>
     </>

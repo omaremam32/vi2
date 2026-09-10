@@ -1,15 +1,86 @@
 .goalsSection,
 .bestSection {
   padding:
-    88px
-    max(32px, calc((100vw - 1440px) / 2));
+    82px
+    max(
+      32px,
+      calc(
+        (100vw - 1440px) /
+        2
+      )
+    );
 
   color: #181916;
   background: #fbfaf7;
 }
 
 .bestSection {
-  background: #eee5d9;
+  padding-top: 34px;
+  padding-bottom: 54px;
+
+  border-bottom:
+    1px solid
+    rgba(24,25,22,0.12);
+
+  background: #fbfaf7;
+}
+
+.compactHeading {
+  margin-bottom: 22px;
+
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+
+  gap: 24px;
+}
+
+.compactHeading > div > span {
+  display: block;
+
+  margin-bottom: 5px;
+
+  color: #777168;
+
+  font-size: 7px;
+  font-weight: 800;
+  letter-spacing: 0.13em;
+}
+
+.compactHeading h2 {
+  margin: 0;
+
+  font-family:
+    var(--font-display),
+    sans-serif;
+
+  font-size:
+    clamp(
+      42px,
+      4.4vw,
+      67px
+    );
+  font-weight: 400;
+  line-height: 0.88;
+}
+
+.compactHeading > a {
+  padding-bottom: 6px;
+
+  display: inline-flex;
+  align-items: center;
+
+  gap: 10px;
+
+  border-bottom:
+    1px solid
+    #181916;
+
+  color: #181916;
+
+  font-size: 7px;
+  font-weight: 800;
+  letter-spacing: 0.1em;
 }
 
 .heading {
@@ -38,8 +109,16 @@
 .brandIntro h2 {
   margin: 0;
 
-  font-family: var(--font-display), sans-serif;
-  font-size: clamp(62px, 7vw, 112px);
+  font-family:
+    var(--font-display),
+    sans-serif;
+
+  font-size:
+    clamp(
+      62px,
+      7vw,
+      112px
+    );
   font-weight: 400;
   line-height: 0.79;
 }
@@ -50,9 +129,12 @@
 
   display: inline-flex;
   align-items: center;
+
   gap: 13px;
 
-  border-bottom: 1px solid #181916;
+  border-bottom:
+    1px solid
+    #181916;
 
   color: #181916;
 
@@ -61,33 +143,62 @@
   letter-spacing: 0.12em;
 }
 
+.productGrid {
+  display: grid;
+  grid-template-columns:
+    repeat(
+      4,
+      minmax(0, 1fr)
+    );
+
+  gap: 1px;
+
+  background:
+    rgba(24,25,22,0.13);
+}
+
 .goalGrid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns:
+    repeat(3, 1fr);
 
-  border-top: 1px solid rgba(24, 25, 22, 0.14);
-  border-left: 1px solid rgba(24, 25, 22, 0.14);
+  border-top:
+    1px solid
+    rgba(24,25,22,0.14);
+
+  border-left:
+    1px solid
+    rgba(24,25,22,0.14);
 }
 
 .goalCard {
   position: relative;
 
   min-height: 250px;
+
   padding: 24px;
 
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
+  justify-content:
+    space-between;
 
-  border-right: 1px solid rgba(24, 25, 22, 0.14);
-  border-bottom: 1px solid rgba(24, 25, 22, 0.14);
+  border-right:
+    1px solid
+    rgba(24,25,22,0.14);
+
+  border-bottom:
+    1px solid
+    rgba(24,25,22,0.14);
 
   color: #181916;
   background: #f4eee5;
 
   transition:
-    background-color 180ms ease,
-    transform 180ms ease;
+    background-color
+      180ms ease,
+    transform
+      180ms ease;
 }
 
 .goalCard:nth-child(2),
@@ -97,20 +208,22 @@
 
 .goalCard:nth-child(3),
 .goalCard:nth-child(6) {
-  background: #6c735c;
   color: #f8f3ea;
+  background: #6c735c;
 }
 
 .goalCard:hover {
   z-index: 2;
 
-  transform: translateY(-4px);
+  transform:
+    translateY(-4px);
 }
 
 .goalTop {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content:
+    space-between;
 }
 
 .goalTop > span {
@@ -122,8 +235,16 @@
 .goalCard h3 {
   margin: 0;
 
-  font-family: var(--font-display), sans-serif;
-  font-size: clamp(38px, 3.4vw, 58px);
+  font-family:
+    var(--font-display),
+    sans-serif;
+
+  font-size:
+    clamp(
+      38px,
+      3.4vw,
+      58px
+    );
   font-weight: 400;
   line-height: 0.9;
 }
@@ -141,6 +262,7 @@
 
 .goalArrow {
   position: absolute;
+
   right: 22px;
   bottom: 22px;
 
@@ -151,23 +273,18 @@
     transform 160ms ease;
 }
 
-.goalCard:hover .goalArrow {
+.goalCard:hover
+  .goalArrow {
   opacity: 1;
-  transform: translateX(3px);
-}
 
-.productGrid {
-  display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-
-  gap: 1px;
-
-  background: rgba(24, 25, 22, 0.13);
+  transform:
+    translateX(3px);
 }
 
 .brandSection {
   display: grid;
-  grid-template-columns: 0.85fr 1.15fr;
+  grid-template-columns:
+    0.85fr 1.15fr;
 
   color: #f7f3ed;
   background: #1c1e1a;
@@ -176,9 +293,15 @@
 .brandIntro {
   padding:
     80px
-    clamp(32px, 5vw, 80px);
+    clamp(
+      32px,
+      5vw,
+      80px
+    );
 
-  border-right: 1px solid rgba(247, 243, 237, 0.15);
+  border-right:
+    1px solid
+    rgba(247,243,237,0.15);
 }
 
 .brandIntro p {
@@ -186,7 +309,8 @@
 
   margin: 28px 0 0;
 
-  color: rgba(247, 243, 237, 0.65);
+  color:
+    rgba(247,243,237,0.65);
 
   font-size: 11px;
   line-height: 1.75;
@@ -194,7 +318,8 @@
 
 .brandList {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
+  grid-template-columns:
+    repeat(2, 1fr);
 }
 
 .brandItem {
@@ -203,17 +328,26 @@
   padding: 24px 28px;
 
   display: grid;
-  grid-template-columns: auto 1fr auto;
+  grid-template-columns:
+    auto 1fr auto;
+
   align-items: center;
 
   gap: 16px;
 
-  border-right: 1px solid rgba(247, 243, 237, 0.13);
-  border-bottom: 1px solid rgba(247, 243, 237, 0.13);
+  border-right:
+    1px solid
+    rgba(247,243,237,0.13);
+
+  border-bottom:
+    1px solid
+    rgba(247,243,237,0.13);
 
   color: #f7f3ed;
 
-  transition: background-color 160ms ease;
+  transition:
+    background-color
+    160ms ease;
 }
 
 .brandItem:hover {
@@ -221,15 +355,24 @@
 }
 
 .brandItem > span {
-  color: rgba(247, 243, 237, 0.45);
+  color:
+    rgba(247,243,237,0.45);
 
   font-size: 7px;
   font-weight: 800;
 }
 
 .brandItem strong {
-  font-family: var(--font-display), sans-serif;
-  font-size: clamp(24px, 2.1vw, 36px);
+  font-family:
+    var(--font-display),
+    sans-serif;
+
+  font-size:
+    clamp(
+      24px,
+      2.1vw,
+      36px
+    );
   font-weight: 400;
 }
 
@@ -238,22 +381,35 @@
 
   padding:
     28px
-    max(32px, calc((100vw - 1440px) / 2));
+    max(
+      32px,
+      calc(
+        (100vw - 1440px) /
+        2
+      )
+    );
 
   display: grid;
-  grid-template-columns: 1fr 1fr auto;
+  grid-template-columns:
+    1fr 1fr auto;
+
   align-items: center;
 
   gap: 28px;
 
-  border-bottom: 1px solid rgba(24, 25, 22, 0.12);
+  border-bottom:
+    1px solid
+    rgba(24,25,22,0.12);
 
   color: #181916;
   background: #cbc1b3;
 }
 
 .dailyStrip strong {
-  font-family: var(--font-display), sans-serif;
+  font-family:
+    var(--font-display),
+    sans-serif;
+
   font-size: 31px;
   font-weight: 400;
 }
@@ -271,29 +427,53 @@
 
 @media (max-width: 1050px) {
   .goalGrid {
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns:
+      repeat(2, 1fr);
   }
 
   .productGrid {
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns:
+      repeat(2, 1fr);
   }
 
   .brandSection {
-    grid-template-columns: 1fr;
+    grid-template-columns:
+      1fr;
   }
 
   .brandIntro {
     border-right: 0;
-    border-bottom: 1px solid rgba(247, 243, 237, 0.15);
+
+    border-bottom:
+      1px solid
+      rgba(247,243,237,0.15);
   }
 }
 
 @media (max-width: 700px) {
-  .goalsSection,
+  .goalsSection {
+    padding:
+      54px
+      14px;
+  }
+
   .bestSection {
     padding:
-      56px
-      14px;
+      28px
+      10px
+      42px;
+  }
+
+  .compactHeading {
+    margin-bottom: 16px;
+  }
+
+  .compactHeading h2 {
+    font-size: 45px;
+  }
+
+  .compactHeading > a {
+    font-size: 6px;
   }
 
   .heading {
@@ -304,7 +484,12 @@
 
   .heading h2,
   .brandIntro h2 {
-    font-size: clamp(54px, 16vw, 78px);
+    font-size:
+      clamp(
+        54px,
+        16vw,
+        78px
+      );
   }
 
   .heading > a {
@@ -317,6 +502,7 @@
 
   .goalCard {
     min-height: 190px;
+
     padding: 18px;
   }
 
@@ -325,7 +511,11 @@
   }
 
   .productGrid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-columns:
+      repeat(
+        2,
+        minmax(0, 1fr)
+      );
   }
 
   .brandIntro {
@@ -335,11 +525,13 @@
   }
 
   .brandList {
-    grid-template-columns: 1fr;
+    grid-template-columns:
+      1fr;
   }
 
   .brandItem {
     min-height: 88px;
+
     padding: 18px;
   }
 
@@ -348,7 +540,9 @@
       28px
       16px;
 
-    grid-template-columns: 1fr;
+    grid-template-columns:
+      1fr;
+
     gap: 15px;
   }
 

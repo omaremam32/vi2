@@ -4,6 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import {
   BadgePercent,
+  ChevronDown,
   ChevronRight,
   Globe2,
   Menu,
@@ -22,6 +23,8 @@ import {
 
 import GlobalSearch from "@/components/GlobalSearch";
 import MobileBottomNav from "@/components/MobileBottomNav";
+import DesktopMegaMenu, { type MegaMenuKey } from "@/components/DesktopMegaMenu";
+import AccountDropdown from "@/components/AccountDropdown";
 import { useCart } from "@/context/CartContext";
 
 import styles from "./Navbar.module.css";
@@ -39,6 +42,12 @@ export default function Navbar() {
 
   const [language, setLanguage] =
     useState<Vi2Language>("en");
+
+  const [megaOpen, setMegaOpen] =
+    useState<MegaMenuKey | null>(null);
+
+  const [accountOpen, setAccountOpen] =
+    useState(false);
 
   const {
     itemCount,
@@ -141,6 +150,8 @@ export default function Navbar() {
 
       setMenuOpen(false);
       setSearchOpen(false);
+      setMegaOpen(null);
+      setAccountOpen(false);
     }
 
     document.addEventListener(
@@ -161,6 +172,8 @@ export default function Navbar() {
 
   function openSearch() {
     setMenuOpen(false);
+    setMegaOpen(null);
+    setAccountOpen(false);
     setSearchOpen(true);
   }
 
@@ -177,13 +190,15 @@ export default function Navbar() {
         signIn:
           "تسجيل الدخول",
         categories:
-          "الفئات",
+          "التسوق",
         supplements:
           "المكملات",
         sports:
           "التغذية الرياضية",
         vitamins:
           "الفيتامينات والمعادن",
+        wellness:
+          "العافية",
         beauty:
           "الجمال والعافية",
         kids:
@@ -227,13 +242,15 @@ export default function Navbar() {
         signIn:
           "SIGN IN",
         categories:
-          "CATEGORIES",
+          "SHOP",
         supplements:
           "Supplements",
         sports:
           "Sports Nutrition",
         vitamins:
           "Vitamins & Minerals",
+        wellness:
+          "Wellness",
         beauty:
           "Beauty & Wellness",
         kids:
@@ -271,37 +288,36 @@ export default function Navbar() {
       label:
         copy.supplements,
       href:
-        "/categories#supplements-botanicals",
+        "/shop",
     },
     {
       label:
         copy.sports,
       href:
-        "/categories#sports-nutrition",
+        "/shop?goal=Muscle%20%26%20Recovery",
     },
     {
       label:
         copy.vitamins,
       href:
-        "/categories#vitamins-minerals",
+        "/shop?category=Vitamins",
     },
     {
       label:
-        copy.beauty,
+        copy.wellness,
       href:
-        "/categories#beauty-skin",
-    },
-    {
-      label:
-        copy.kids,
-      href:
-        "/categories#baby-kids",
+        "/shop?category=Wellness",
     },
   ];
 
   return (
     <>
-      <header className={styles.header}>
+      <header
+        className={styles.header}
+        onMouseLeave={() =>
+          setMegaOpen(null)
+        }
+      >
         {/* ======================================================
             DESKTOP UTILITY STRIP
             ====================================================== */}
@@ -439,25 +455,58 @@ export default function Navbar() {
               />
             </button>
 
-            <Link
-              href="/account"
-              className={styles.account}
+            <div
+              className={styles.accountWrap}
+              onMouseEnter={() => {
+                setMegaOpen(null);
+                setAccountOpen(true);
+              }}
+              onMouseLeave={() =>
+                setAccountOpen(false)
+              }
             >
-              <UserRound
-                size={21}
-                strokeWidth={1.4}
+              <button
+                type="button"
+                className={styles.account}
+                aria-expanded={accountOpen}
+                aria-haspopup="dialog"
+                onClick={() => {
+                  setMegaOpen(null);
+                  setAccountOpen(
+                    (current) => !current,
+                  );
+                }}
+              >
+                <UserRound
+                  size={21}
+                  strokeWidth={1.4}
+                />
+
+                <div>
+                  <span>
+                    {copy.account}
+                  </span>
+
+                  <strong>
+                    {copy.signIn}
+                  </strong>
+                </div>
+
+                <ChevronDown
+                  className={styles.accountChevron}
+                  size={14}
+                  strokeWidth={1.5}
+                />
+              </button>
+
+              <AccountDropdown
+                open={accountOpen}
+                isArabic={isArabic}
+                onClose={() =>
+                  setAccountOpen(false)
+                }
               />
-
-              <div>
-                <span>
-                  {copy.account}
-                </span>
-
-                <strong>
-                  {copy.signIn}
-                </strong>
-              </div>
-            </Link>
+            </div>
 
             <button
               type="button"
@@ -489,25 +538,101 @@ export default function Navbar() {
         <nav className={styles.desktopCategories}>
           <div className={styles.categoryInner}>
             <div className={styles.categoryMain}>
-              <Link href="/categories#supplements-botanicals">
+              <button
+                type="button"
+                className={
+                  megaOpen === "supplements"
+                    ? styles.categoryTriggerActive
+                    : styles.categoryTrigger
+                }
+                onMouseEnter={() =>
+                  setMegaOpen("supplements")
+                }
+                onFocus={() =>
+                  setMegaOpen("supplements")
+                }
+                onClick={() =>
+                  setMegaOpen(
+                    megaOpen === "supplements"
+                      ? null
+                      : "supplements",
+                  )
+                }
+              >
                 {copy.supplements}
-              </Link>
+              </button>
 
-              <Link href="/categories#sports-nutrition">
+              <button
+                type="button"
+                className={
+                  megaOpen === "sports"
+                    ? styles.categoryTriggerActive
+                    : styles.categoryTrigger
+                }
+                onMouseEnter={() =>
+                  setMegaOpen("sports")
+                }
+                onFocus={() =>
+                  setMegaOpen("sports")
+                }
+                onClick={() =>
+                  setMegaOpen(
+                    megaOpen === "sports"
+                      ? null
+                      : "sports",
+                  )
+                }
+              >
                 {copy.sports}
-              </Link>
+              </button>
 
-              <Link href="/categories#vitamins-minerals">
+              <button
+                type="button"
+                className={
+                  megaOpen === "vitamins"
+                    ? styles.categoryTriggerActive
+                    : styles.categoryTrigger
+                }
+                onMouseEnter={() =>
+                  setMegaOpen("vitamins")
+                }
+                onFocus={() =>
+                  setMegaOpen("vitamins")
+                }
+                onClick={() =>
+                  setMegaOpen(
+                    megaOpen === "vitamins"
+                      ? null
+                      : "vitamins",
+                  )
+                }
+              >
                 {copy.vitamins}
-              </Link>
+              </button>
 
-              <Link href="/categories#beauty-skin">
-                {copy.beauty}
-              </Link>
-
-              <Link href="/categories#baby-kids">
-                {copy.kids}
-              </Link>
+              <button
+                type="button"
+                className={
+                  megaOpen === "wellness"
+                    ? styles.categoryTriggerActive
+                    : styles.categoryTrigger
+                }
+                onMouseEnter={() =>
+                  setMegaOpen("wellness")
+                }
+                onFocus={() =>
+                  setMegaOpen("wellness")
+                }
+                onClick={() =>
+                  setMegaOpen(
+                    megaOpen === "wellness"
+                      ? null
+                      : "wellness",
+                  )
+                }
+              >
+                {copy.wellness}
+              </button>
 
               <span
                 className={
@@ -519,7 +644,7 @@ export default function Navbar() {
                 {copy.brands}
               </Link>
 
-              <Link href="/categories#health-goals">
+              <Link href="/#health-goals">
                 {copy.health}
               </Link>
             </div>
@@ -532,7 +657,7 @@ export default function Navbar() {
                 {copy.deals}
               </Link>
 
-              <Link href="/shop">
+              <Link href="/shop?sort=rating">
                 {copy.best}
               </Link>
 
@@ -549,6 +674,13 @@ export default function Navbar() {
             </div>
           </div>
         </nav>
+
+        <DesktopMegaMenu
+          active={megaOpen}
+          onClose={() =>
+            setMegaOpen(null)
+          }
+        />
       </header>
 
       {/* ======================================================
@@ -580,7 +712,7 @@ export default function Navbar() {
         >
           <div className={styles.drawerHeader}>
             <Link
-              href="/account"
+              href="/account/sign-in"
               className={styles.welcome}
               onClick={closeMenu}
             >
@@ -642,7 +774,7 @@ export default function Navbar() {
 
               <nav className={styles.simpleLinks}>
                 <Link
-                  href="/categories#health-goals"
+                  href="/#health-goals"
                   onClick={closeMenu}
                 >
                   <span className={styles.linkWithIcon}>
@@ -697,7 +829,7 @@ export default function Navbar() {
                 </Link>
 
                 <Link
-                  href="/shop"
+                  href="/shop?sort=rating"
                   onClick={closeMenu}
                 >
                   <span className={styles.linkWithIcon}>
@@ -811,7 +943,7 @@ export default function Navbar() {
           </div>
 
           <Link
-            href="/account"
+            href="/account/sign-in"
             className={styles.drawerCta}
             onClick={closeMenu}
           >

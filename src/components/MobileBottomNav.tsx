@@ -186,7 +186,7 @@ export default function MobileBottomNav({
             : ""
         }
         onClick={() =>
-          goTo("/account")
+          goTo("/account/sign-in")
         }
       >
         <UserRound
