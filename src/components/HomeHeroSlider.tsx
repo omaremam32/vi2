@@ -1,17 +1,16 @@
 "use client";
 
 import Image from "next/image";
-import Link from "next/link";
 import {
-  ArrowLeft,
-  ArrowRight,
-  Beaker,
+  Dumbbell,
   Leaf,
   ShieldCheck,
+  Sparkles,
 } from "lucide-react";
 import {
   useCallback,
   useEffect,
+  useRef,
   useState,
 } from "react";
 
@@ -20,35 +19,27 @@ import styles from "./HomeHeroSlider.module.css";
 const slides = [
   {
     image:
-      "/hero/slider/vi2-hero-performance.webp",
+      "/hero/slider-v9/performance.webp",
     alt:
-      "Vi2 performance supplements arranged on natural stone",
-    label:
-      "PERFORMANCE ESSENTIALS",
+      "Vi2 performance supplement collection",
   },
   {
     image:
-      "/hero/slider/vi2-hero-daily-wellness.webp",
+      "/hero/slider-v9/daily-wellness.webp",
     alt:
-      "Vi2 daily wellness supplements with botanical styling",
-    label:
-      "DAILY WELLNESS",
+      "Vi2 daily wellness supplement collection",
   },
   {
     image:
-      "/hero/slider/vi2-hero-sports.webp",
+      "/hero/slider-v9/sports.webp",
     alt:
-      "Vi2 sports nutrition collection in a premium training setting",
-    label:
-      "SPORTS NUTRITION",
+      "Vi2 sports nutrition supplement collection",
   },
   {
     image:
-      "/hero/slider/vi2-hero-wellness.webp",
+      "/hero/slider-v9/wellness.webp",
     alt:
-      "Vi2 colorful everyday wellness supplements",
-    label:
-      "EVERYDAY WELLNESS",
+      "Vi2 everyday wellness supplement collection",
   },
 ];
 
@@ -59,6 +50,9 @@ export default function HomeHeroSlider() {
   const [paused, setPaused] =
     useState(false);
 
+  const touchStartX = useRef<number | null>(null);
+  const touchCurrentX = useRef<number | null>(null);
+
   const next = useCallback(() => {
     setActive(
       (current) =>
@@ -67,16 +61,13 @@ export default function HomeHeroSlider() {
     );
   }, []);
 
-  const previous =
-    useCallback(() => {
-      setActive(
-        (current) =>
-          (current -
-            1 +
-            slides.length) %
-          slides.length,
-      );
-    }, []);
+  const previous = useCallback(() => {
+    setActive(
+      (current) =>
+        (current - 1 + slides.length) %
+        slides.length,
+    );
+  }, []);
 
   useEffect(() => {
     if (paused) {
@@ -95,7 +86,7 @@ export default function HomeHeroSlider() {
     const timer =
       window.setInterval(
         next,
-        5600,
+        2000,
       );
 
     return () =>
@@ -107,89 +98,159 @@ export default function HomeHeroSlider() {
     paused,
   ]);
 
+  function handleTouchStart(
+    event: React.TouchEvent<HTMLElement>,
+  ) {
+    const x = event.touches[0]?.clientX ?? null;
+
+    touchStartX.current = x;
+    touchCurrentX.current = x;
+
+    setPaused(true);
+  }
+
+  function handleTouchMove(
+    event: React.TouchEvent<HTMLElement>,
+  ) {
+    touchCurrentX.current =
+      event.touches[0]?.clientX ??
+      touchCurrentX.current;
+  }
+
+  function handleTouchEnd() {
+    if (
+      touchStartX.current === null ||
+      touchCurrentX.current === null
+    ) {
+      setPaused(false);
+      return;
+    }
+
+    const distance =
+      touchCurrentX.current -
+      touchStartX.current;
+
+    const swipeThreshold = 45;
+
+    if (distance <= -swipeThreshold) {
+      next();
+    } else if (distance >= swipeThreshold) {
+      previous();
+    }
+
+    touchStartX.current = null;
+    touchCurrentX.current = null;
+
+    window.setTimeout(
+      () => setPaused(false),
+      220,
+    );
+  }
+
   return (
     <section
       className={styles.hero}
+      aria-label="Vi2 featured collections"
+      aria-roledescription="carousel"
       onMouseEnter={() =>
         setPaused(true)
       }
       onMouseLeave={() =>
         setPaused(false)
       }
-      aria-roledescription="carousel"
-      aria-label="Vi2 featured collections"
+      onTouchStart={handleTouchStart}
+      onTouchMove={handleTouchMove}
+      onTouchEnd={handleTouchEnd}
+      onTouchCancel={handleTouchEnd}
     >
-      <div className={styles.copySide}>
-        <div className={styles.copyInner}>
-          <div
-            className={styles.vi2Wordmark}
-            aria-label="Vi2"
-          >
-            <span>V</span>
-            <span>i</span>
-            <span>2</span>
+      <div className={styles.identity}>
+        <div className={styles.identityInner}>
+          <div className={styles.brandRow}>
+            <Image
+              src="/brand/vi2-wordmark-packaging.png"
+              alt="Vi2"
+              width={164}
+              height={66}
+              priority
+              className={styles.wordmarkImage}
+            />
+
+            <span
+              className={styles.brandDivider}
+            />
+
+            <span
+              className={styles.brandDescriptor}
+            >
+              MORE THAN
+              <br />
+              SUPPLEMENTS
+            </span>
+
+            <span
+              className={styles.brandRule}
+            />
           </div>
 
-          <span
-            className={styles.eyebrow}
-          >
-            {slides[active].label}
-          </span>
-
           <h1>
-            LIVE WELL,
-            <br />
-            LIVE FULLY.
+            <span>
+              LIVE WELL,
+            </span>
+
+            <strong>
+              LIVE FULLY.
+            </strong>
           </h1>
 
-          <p>
-            Premium supplements,
-            rooted in wellness and
-            backed by quality.
+          <p className={styles.statement}>
+            PREMIUM SUPPLEMENTS
+            <br />
+            FOR A STRONGER, HEALTHIER YOU.
           </p>
 
-          <Link
-            href="/shop"
-            className={styles.shopButton}
-          >
-            SHOP NOW
-
-            <ArrowRight
-              size={17}
-              strokeWidth={1.6}
-            />
-          </Link>
-
-          <div className={styles.trust}>
+          <div className={styles.values}>
             <div>
               <Leaf
-                size={21}
+                size={25}
                 strokeWidth={1.35}
               />
 
               <span>
-                TRUSTED
+                HIGH
                 <br />
                 QUALITY
               </span>
             </div>
 
             <div>
-              <Beaker
-                size={21}
+              <Dumbbell
+                size={25}
                 strokeWidth={1.35}
               />
 
               <span>
-                SCIENCE-
+                REAL
                 <br />
-                FOCUSED
+                RESULTS
               </span>
             </div>
 
             <div>
               <ShieldCheck
-                size={21}
+                size={25}
+                strokeWidth={1.35}
+              />
+
+              <span>
+                TRUSTED
+                <br />
+                BRANDS
+              </span>
+            </div>
+
+            <div>
+              <Sparkles
+                size={25}
                 strokeWidth={1.35}
               />
 
@@ -200,10 +261,21 @@ export default function HomeHeroSlider() {
               </span>
             </div>
           </div>
+
+          <div className={styles.footerLine}>
+            <span />
+
+            <small>
+              SUPPLEMENTS FOR A
+              BRIGHTER YOU
+            </small>
+
+            <span />
+          </div>
         </div>
       </div>
 
-      <div className={styles.visualSide}>
+      <div className={styles.visual}>
         {slides.map(
           (
             slide,
@@ -232,42 +304,12 @@ export default function HomeHeroSlider() {
                   index === 0
                 }
                 quality={100}
-                sizes="(max-width: 700px) 100vw, 58vw"
+                sizes="(max-width: 760px) 100vw, 58vw"
                 className={styles.slideImage}
               />
             </div>
           ),
         )}
-
-        <div
-          className={
-            styles.visualShade
-          }
-        />
-
-        <button
-          type="button"
-          className={`${styles.arrow} ${styles.arrowLeft}`}
-          aria-label="Previous slide"
-          onClick={previous}
-        >
-          <ArrowLeft
-            size={21}
-            strokeWidth={1.5}
-          />
-        </button>
-
-        <button
-          type="button"
-          className={`${styles.arrow} ${styles.arrowRight}`}
-          aria-label="Next slide"
-          onClick={next}
-        >
-          <ArrowRight
-            size={21}
-            strokeWidth={1.5}
-          />
-        </button>
 
         <div
           className={styles.dots}
