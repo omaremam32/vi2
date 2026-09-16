@@ -1,4 +1,5 @@
-import FlashDeals from "@/components/FlashDeals";
+import BrandUniverse from "@/components/BrandUniverse";
+import HomeBestSellers from "@/components/HomeBestSellers";
 import HomeDiscovery from "@/components/HomeDiscovery";
 import HomeHeroSlider from "@/components/HomeHeroSlider";
 import TrendingNow from "@/components/TrendingNow";
@@ -8,33 +9,35 @@ export default function Home() {
   return (
     <main>
       {/* ======================================================
-          VI2 PHOTO HERO SLIDER
+          HERO
           ====================================================== */}
       <HomeHeroSlider />
 
       {/* ======================================================
-          BEST SELLERS + HEALTH GOALS + BRANDS
-          ====================================================== */}
-      <HomeDiscovery />
-
-      {/* ======================================================
-          FLASH DEALS
-          ====================================================== */}
-      <FlashDeals />
-
-      {/* ======================================================
-          VALUE SETS / BUNDLES
-          ====================================================== */}
-      <ValueSets />
-
-      {/* ======================================================
-          TRENDING NOW
+          1. TRENDING NOW
           ====================================================== */}
       <TrendingNow />
 
       {/* ======================================================
-          FINAL BRAND STATEMENT
+          2. BEST SELLERS — DIRECTLY UNDER TRENDING
           ====================================================== */}
+      <HomeBestSellers />
+
+      {/* ======================================================
+          3. BRANDS IN OUR ORBIT
+          ====================================================== */}
+      <BrandUniverse />
+
+      {/* ======================================================
+          4. HEALTH GOALS / DAILY DISCOVERY
+          ====================================================== */}
+      <HomeDiscovery />
+
+      {/* ======================================================
+          5. VALUE SETS / BUNDLES
+          ====================================================== */}
+      <ValueSets />
+
       <section className="brand-statement">
         <span>
           LIVE WELL, LIVE FULLY.

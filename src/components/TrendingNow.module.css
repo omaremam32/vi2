@@ -73,6 +73,7 @@
 }
 
 .viewport {
+  direction: ltr;
   position: relative;
 
   width: 100%;
@@ -118,7 +119,12 @@
     );
 }
 
+
 .track {
+  position: absolute;
+  inset-block: 0;
+  left: 0;
+
   width: max-content;
   height: 100%;
 
@@ -129,26 +135,35 @@
 
   padding: 0 18px;
 
-  animation:
-    productRail
-    46s
-    linear
-    infinite;
+  animation: productRail 46s linear infinite;
 
   will-change: transform;
 }
 
-.viewport:hover .track {
-  animation-play-state: paused;
+:global(html[dir="rtl"]) .track {
+  left: auto;
+  right: 0;
+
+  animation-name: productRailRtl;
 }
 
 @keyframes productRail {
   from {
-    transform: translateX(0);
+    transform: translate3d(0, 0, 0);
   }
 
   to {
-    transform: translateX(-50%);
+    transform: translate3d(-50%, 0, 0);
+  }
+}
+
+@keyframes productRailRtl {
+  from {
+    transform: translate3d(0, 0, 0);
+  }
+
+  to {
+    transform: translate3d(50%, 0, 0);
   }
 }
 

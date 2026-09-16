@@ -68,7 +68,7 @@ export default function ValueSets() {
         <div>
           <span>VI2 VALUE SETS</span>
 
-          <h2>
+          <h2 data-arabic-text="ابنِ روتينك.">
             BUILD A
             <br />
             ROUTINE.

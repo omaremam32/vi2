@@ -1,3 +1,6 @@
+"use client";
+
+import Image from "next/image";
 import Link from "next/link";
 import {
   Activity,
@@ -6,10 +9,12 @@ import {
   Heart,
   Moon,
   ShieldCheck,
+  Sparkles,
+  Zap,
 } from "lucide-react";
-
-import ProductCard from "@/components/ProductCard";
-import { products } from "@/data/products";
+import {
+  useState,
+} from "react";
 
 import styles from "./HomeDiscovery.module.css";
 
@@ -18,352 +23,349 @@ const goals = [
     name: "IMMUNE SUPPORT",
     query: "Immune Support",
     description:
-      "Vitamin C, D3, zinc and everyday immune essentials.",
+      "Everyday defense",
+    detail:
+      "Vitamin C, D3, zinc and daily immune-support essentials.",
     icon: ShieldCheck,
   },
   {
     name: "GUT HEALTH",
     query: "Gut Health",
     description:
-      "Probiotics and digestive-support routines.",
+      "Feel better daily",
+    detail:
+      "Probiotics and digestive-support routines for everyday balance.",
     icon: Activity,
-  },
-  {
-    name: "MUSCLE & RECOVERY",
-    query: "Muscle & Recovery",
-    description:
-      "Protein, creatine and recovery-focused nutrition.",
-    icon: Dumbbell,
   },
   {
     name: "ENERGY & FITNESS",
     query: "Energy & Fitness",
     description:
-      "Performance and daily energy support.",
-    icon: Activity,
+      "Fuel your day",
+    detail:
+      "Performance-focused nutrition for energy, movement and daily drive.",
+    icon: Zap,
+  },
+  {
+    name: "MUSCLE & RECOVERY",
+    query: "Muscle & Recovery",
+    description:
+      "Build. Repair. Perform.",
+    detail:
+      "Protein, creatine and recovery support for stronger training days.",
+    icon: Dumbbell,
   },
   {
     name: "HEART HEALTH",
     query: "Heart Health",
     description:
-      "Omega and cardiovascular wellness essentials.",
+      "For a healthier tomorrow",
+    detail:
+      "Omega support and cardiovascular wellness essentials.",
     icon: Heart,
   },
   {
     name: "STRESS & SLEEP",
     query: "Stress & Sleep",
     description:
-      "Calm, sleep and stress-support routines.",
+      "A calmer, better you",
+    detail:
+      "Sleep and stress-support routines built around better recovery.",
     icon: Moon,
   },
 ];
 
-const bestSellers = [
-  ...products,
-]
-  .sort(
-    (a, b) =>
-      Number(
-        b.badge ===
-          "Best Seller",
-      ) -
-        Number(
-          a.badge ===
-            "Best Seller",
-        ) ||
-      b.rating -
-        a.rating ||
-      b.reviewCount -
-        a.reviewCount,
-  )
-  .slice(0, 4);
-
-const brands =
-  Array.from(
-    new Set(
-      products.map(
-        (product) =>
-          product.brand,
-      ),
-    ),
-  ).slice(0, 8);
-
 export default function HomeDiscovery() {
+  const [
+    activeIndex,
+    setActiveIndex,
+  ] = useState(3);
+
+  const activeGoal =
+    goals[activeIndex];
+
+  const ActiveIcon =
+    activeGoal.icon;
+
   return (
-    <>
-      {/* ====================================================
-          BEST SELLERS — FIRST SECTION UNDER HERO
-          ==================================================== */}
-      <section
+    <section
+      id="health-goals"
+      className={
+        styles.section
+      }
+    >
+      <div
         className={
-          styles.bestSection
+          styles.shell
         }
       >
-        <div
+        <header
           className={
-            styles.compactHeading
+            styles.header
           }
         >
-          <div>
-            <span>
-              POPULAR RIGHT NOW
-            </span>
-
-            <h2>
-              BEST SELLERS
-            </h2>
-          </div>
-
-          <Link
-            href="/shop?sort=rating"
+          <div
+            className={
+              styles.heading
+            }
           >
-            VIEW ALL
-
-            <ArrowRight
-              size={16}
-              strokeWidth={1.5}
-            />
-          </Link>
-        </div>
-
-        <div
-          className={
-            styles.productGrid
-          }
-        >
-          {bestSellers.map(
-            (product) => (
-              <ProductCard
-                key={
-                  product.id
-                }
-                product={
-                  product
-                }
-              />
-            ),
-          )}
-        </div>
-      </section>
-
-      {/* ====================================================
-          HEALTH GOALS
-          ==================================================== */}
-      <section
-        id="health-goals"
-        className={
-          styles.goalsSection
-        }
-      >
-        <div
-          className={
-            styles.heading
-          }
-        >
-          <div>
             <span>
               SHOP BY HEALTH GOAL
             </span>
 
-            <h2>
-              START WITH
-              <br />
-              WHAT YOU NEED.
-            </h2>
+            <div
+              className={
+                styles.headingLine
+              }
+            >
+              <h2 data-arabic-text="ابدأ بما تحتاجه.">
+                START WITH
+                <br />
+                WHAT YOU NEED.
+              </h2>
+
+              <div
+                className={
+                  styles.promise
+                }
+              >
+                <i />
+
+                <p>
+                  <span data-arabic-text="صحة حقيقية. تقدم حقيقي. نسخة أقوى منك.">
+                  Real health.
+                  <br />
+                  Real progress.
+                  <br />
+                  A stronger you.
+                  </span>
+                </p>
+              </div>
+            </div>
           </div>
 
-          <Link href="/shop">
+          <Link
+            href="/shop"
+            className={
+              styles.viewAll
+            }
+          >
             VIEW ALL
-
             <ArrowRight
-              size={16}
+              size={17}
+              strokeWidth={
+                1.45
+              }
             />
           </Link>
-        </div>
+        </header>
 
         <div
           className={
-            styles.goalGrid
+            styles.orbit
           }
         >
-          {goals.map(
-            (
-              goal,
-              index,
-            ) => {
-              const Icon =
-                goal.icon;
+          <div
+            className={
+              styles.orbitLine
+            }
+            aria-hidden="true"
+          >
+            <span />
+            <span />
+            <span />
+          </div>
 
-              return (
-                <Link
-                  key={
-                    goal.name
-                  }
-                  href={`/shop?goal=${encodeURIComponent(
-                    goal.query,
-                  )}`}
-                  className={
-                    styles.goalCard
-                  }
-                >
-                  <div
-                    className={
-                      styles.goalTop
+          <div
+            className={
+              styles.goalRail
+            }
+          >
+            {goals.map(
+              (
+                goal,
+                index,
+              ) => {
+                const Icon =
+                  goal.icon;
+
+                const active =
+                  index ===
+                  activeIndex;
+
+                return (
+                  <button
+                    key={
+                      goal.name
+                    }
+                    type="button"
+                    className={`${styles.goal} ${
+                      active
+                        ? styles.activeGoal
+                        : ""
+                    }`}
+                    onMouseEnter={() =>
+                      setActiveIndex(
+                        index,
+                      )
+                    }
+                    onFocus={() =>
+                      setActiveIndex(
+                        index,
+                      )
+                    }
+                    onClick={() =>
+                      setActiveIndex(
+                        index,
+                      )
+                    }
+                    aria-pressed={
+                      active
                     }
                   >
-                    <span>
-                      {String(
-                        index +
-                          1,
-                      ).padStart(
-                        2,
-                        "0",
-                      )}
-                    </span>
+                    {active && (
+                      <div
+                        className={
+                          styles.activeBackdrop
+                        }
+                      >
+                        <span
+                          className={
+                            styles.ringOne
+                          }
+                        />
 
-                    <Icon
-                      size={24}
-                      strokeWidth={
-                        1.35
+                        <span
+                          className={
+                            styles.ringTwo
+                          }
+                        />
+
+                        <div
+                          className={
+                            styles.athlete
+                          }
+                        >
+                          <Image
+                            src="/health-goals/vi2-athlete.png"
+                            alt=""
+                            fill
+                            sizes="210px"
+                            className={
+                              styles.athleteImage
+                            }
+                          />
+                        </div>
+
+                        <span
+                          className={
+                            styles.stronger
+                          }
+                          data-arabic-text="أقوى كل يوم"
+                        >
+                          STRONGER
+                          <br />
+                          EVERYDAY
+                        </span>
+                      </div>
+                    )}
+
+                    <div
+                      className={
+                        styles.iconCircle
                       }
-                    />
-                  </div>
+                    >
+                      <Icon
+                        size={
+                          active
+                            ? 34
+                            : 29
+                        }
+                        strokeWidth={
+                          1.45
+                        }
+                      />
+                    </div>
 
-                  <div>
-                    <h3>
+                    <strong>
                       {goal.name}
-                    </h3>
+                    </strong>
 
-                    <p>
+                    <span
+                      className={
+                        styles.short
+                      }
+                    >
                       {
                         goal.description
                       }
-                    </p>
-                  </div>
+                    </span>
+                  </button>
+                );
+              },
+            )}
+          </div>
 
-                  <ArrowRight
-                    className={
-                      styles.goalArrow
-                    }
-                    size={20}
-                    strokeWidth={
-                      1.5
-                    }
-                  />
-                </Link>
-              );
-            },
-          )}
-        </div>
-      </section>
-
-      {/* ====================================================
-          BRANDS
-          ==================================================== */}
-      <section
-        className={
-          styles.brandSection
-        }
-      >
-        <div
-          className={
-            styles.brandIntro
-          }
-        >
-          <span>
-            BRANDS AT VI2
-          </span>
-
-          <h2>
-            ONE STORE.
-            <br />
-            TRUSTED NAMES.
-          </h2>
-
-          <p>
-            Discover Vi2 products
-            alongside selected
-            international supplement
-            brands in one organized
-            catalog.
-          </p>
-        </div>
-
-        <div
-          className={
-            styles.brandList
-          }
-        >
-          {brands.map(
-            (
-              brand,
-              index,
-            ) => (
-              <Link
-                key={brand}
-                href={`/shop?brand=${encodeURIComponent(
-                  brand,
-                )}`}
-                className={
-                  styles.brandItem
+          <div
+            className={
+              styles.activeSummary
+            }
+          >
+            <div
+              className={
+                styles.activeMeta
+              }
+            >
+              <Sparkles
+                size={13}
+                strokeWidth={
+                  1.45
                 }
-              >
-                <span>
-                  {String(
-                    index +
-                      1,
-                  ).padStart(
-                    2,
-                    "0",
-                  )}
-                </span>
+              />
 
-                <strong>
-                  {brand}
-                </strong>
+              <span>
+                VI2 GOAL PICK
+              </span>
+            </div>
 
-                <ArrowRight
-                  size={16}
-                  strokeWidth={
-                    1.5
-                  }
-                />
-              </Link>
-            ),
-          )}
+            <div
+              className={
+                styles.activeCopy
+              }
+            >
+              <ActiveIcon
+                size={19}
+                strokeWidth={
+                  1.45
+                }
+              />
+
+              <p>
+                {
+                  activeGoal.detail
+                }
+              </p>
+            </div>
+
+            <Link
+              href={`/shop?goal=${encodeURIComponent(
+                activeGoal.query,
+              )}`}
+              className={
+                styles.shopNow
+              }
+            >
+              SHOP NOW
+              <ArrowRight
+                size={16}
+                strokeWidth={
+                  1.5
+                }
+              />
+            </Link>
+          </div>
         </div>
-      </section>
-
-      <section
-        className={
-          styles.dailyStrip
-        }
-      >
-        <div>
-          <span>
-            DAILY DISCOVERY
-          </span>
-
-          <strong>
-            FIND TODAY&apos;S
-            VI2 PICKS
-          </strong>
-        </div>
-
-        <p>
-          A rotating edit of
-          popular wellness and
-          sports-nutrition products.
-        </p>
-
-        <Link href="/shop">
-          EXPLORE
-
-          <ArrowRight
-            size={16}
-          />
-        </Link>
-      </section>
-    </>
+      </div>
+    </section>
   );
 }

@@ -203,7 +203,7 @@ export default function ProductSocialProof({
                   {getProductHealthGoals(
                     product,
                   ).map((goal) => (
-                    <option key={goal}>
+                    <option key={goal} value={goal}>
                       {goal}
                     </option>
                   ))}

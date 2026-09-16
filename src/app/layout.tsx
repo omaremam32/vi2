@@ -1,9 +1,6 @@
 import type { Metadata } from "next";
-import {
-  Bebas_Neue,
-  Cairo,
-  Inter,
-} from "next/font/google";
+import { Bebas_Neue, Cairo, Inter } from "next/font/google";
+import Script from "next/script";
 
 import "./globals.css";
 import "./rtl-support.css";
@@ -14,8 +11,8 @@ import CartDrawer from "@/components/CartDrawer";
 import Footer from "@/components/Footer";
 
 const bebasNeue = Bebas_Neue({
-  weight: "400",
   subsets: ["latin"],
+  weight: "400",
   variable: "--font-display",
   display: "swap",
 });
@@ -27,19 +24,14 @@ const inter = Inter({
 });
 
 const cairo = Cairo({
-  subsets: [
-    "arabic",
-    "latin",
-  ],
+  subsets: ["arabic", "latin"],
   variable: "--font-arabic",
   display: "swap",
 });
 
 export const metadata: Metadata = {
-  title:
-    "Vi2 — Live Well, Live Fully",
-  description:
-    "Dietary, wellness and sports nutrition.",
+  title: "Vi2 — Live Well, Live Fully",
+  description: "Dietary, wellness and sports nutrition.",
 };
 
 export default function RootLayout({
@@ -48,9 +40,28 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html
+      lang="en"
+      dir="ltr"
+      suppressHydrationWarning
+      data-scroll-behavior="smooth"
+    >
+      <head>
+        <Script id="vi2-language-init" strategy="beforeInteractive">
+          {`
+            try {
+              var language = localStorage.getItem("vi2-language") === "ar" ? "ar" : "en";
+              document.documentElement.lang = language;
+              document.documentElement.dir = language === "ar" ? "rtl" : "ltr";
+              document.body && (document.body.dataset.locale = language);
+            } catch (error) {}
+          `}
+        </Script>
+      </head>
+
       <body
         className={`${bebasNeue.variable} ${inter.variable} ${cairo.variable}`}
+        suppressHydrationWarning
       >
         <Providers>
           <Navbar />

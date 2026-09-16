@@ -36,19 +36,19 @@ export default function Footer() {
           </Link>
 
           <Link href="/shop?category=Protein">
-            Protein
+            <span data-arabic-text="البروتين">Protein</span>
           </Link>
 
           <Link href="/shop?category=Creatine">
-            Creatine
+            <span data-arabic-text="الكرياتين">Creatine</span>
           </Link>
 
           <Link href="/shop?category=Vitamins">
-            Vitamins
+            <span data-arabic-text="الفيتامينات">Vitamins</span>
           </Link>
 
           <Link href="/shop?category=Wellness">
-            Wellness
+            <span data-arabic-text="العافية">Wellness</span>
           </Link>
         </section>
 

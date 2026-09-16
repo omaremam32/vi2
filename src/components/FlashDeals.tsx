@@ -60,7 +60,7 @@ export default function FlashDeals() {
             DAILY ROTATION
           </span>
 
-          <h2>
+          <h2 data-arabic-text="عروض سريعة.">
             FLASH
             <br />
             DEALS.

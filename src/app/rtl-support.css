@@ -1,11 +1,71 @@
+html,
+body {
+  overflow-x: clip;
+}
+
 html[dir="rtl"] body {
   direction: rtl;
+
   font-family:
     var(--font-arabic),
     var(--font-body),
+    Arial,
     sans-serif;
 }
 
+/* Arabic readable typography */
+html[dir="rtl"] :is(
+  h1,
+  h2,
+  h3,
+  p,
+  span,
+  strong,
+  small,
+  a,
+  button,
+  label,
+  input,
+  select,
+  textarea
+) {
+  letter-spacing: 0 !important;
+  line-height: 1.45;
+}
+
+html[dir="rtl"] :is(
+  h1,
+  h2,
+  h3
+) {
+  font-family:
+    var(--font-arabic),
+    Arial,
+    sans-serif !important;
+
+  font-weight: 700;
+}
+
+/* Make tiny Arabic UI text visible */
+html[dir="rtl"] body :is(
+  small,
+  label,
+  button,
+  input,
+  select,
+  textarea,
+  .eyebrow,
+  .kicker,
+  .badge,
+  .chip,
+  .tag,
+  .meta,
+  .caption
+) {
+  font-size: max(12px, 1em) !important;
+}
+
+/* Keep form fields aligned correctly */
 html[dir="rtl"] input,
 html[dir="rtl"] textarea,
 html[dir="rtl"] select {
@@ -13,16 +73,58 @@ html[dir="rtl"] select {
   text-align: right;
 }
 
+/* Numbers, prices, order references, emails and phone numbers stay LTR */
+html[dir="rtl"] input[type="email"],
+html[dir="rtl"] input[type="tel"],
+html[dir="rtl"] input[type="url"],
+html[dir="rtl"] input[type="password"],
+html[dir="rtl"] [data-price],
+html[dir="rtl"] [data-order-reference] {
+  direction: ltr;
+  text-align: left;
+  unicode-bidi: isolate;
+}
+
+/* Cart drawer opens from the left in Arabic */
+html[dir="rtl"] .cart-drawer {
+  right: auto;
+  left: 0;
+
+  box-shadow:
+    30px 0 80px
+    rgba(0, 0, 0, 0.13);
+
+  transform: translateX(-100%);
+}
+
+html[dir="rtl"] .cart-drawer-open {
+  transform: translateX(0);
+}
+
+/* Flip directional icons */
+html[dir="rtl"] :is(
+  .lucide-arrow-right,
+  .lucide-arrow-left,
+  .lucide-arrow-up-right,
+  .lucide-chevron-right,
+  .lucide-chevron-left
+) {
+  transform: scaleX(-1);
+}
+
+/* Arabic buttons and links should not use the condensed English font */
 html[dir="rtl"] button,
 html[dir="rtl"] a {
   font-family:
     var(--font-arabic),
     var(--font-body),
+    Arial,
     sans-serif;
 }
 
-html[dir="rtl"] [data-price],
-html[dir="rtl"] [data-order-reference] {
-  direction: ltr;
-  unicode-bidi: isolate;
+/* Product/card text spacing in Arabic */
+html[dir="rtl"] .cart-item-name,
+html[dir="rtl"] .product-title,
+html[dir="rtl"] .product-name {
+  line-height: 1.65;
 }

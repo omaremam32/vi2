@@ -3,6 +3,7 @@
 import type { ReactNode } from "react";
 
 import { CartProvider } from "@/context/CartContext";
+import { LanguageProvider } from "@/context/LanguageContext";
 
 export default function Providers({
   children,
@@ -10,8 +11,8 @@ export default function Providers({
   children: ReactNode;
 }) {
   return (
-    <CartProvider>
-      {children}
-    </CartProvider>
+    <LanguageProvider>
+      <CartProvider>{children}</CartProvider>
+    </LanguageProvider>
   );
 }

@@ -23,6 +23,7 @@ import {
   matchesGoal,
   productForms,
 } from "@/lib/catalogMeta";
+import { getArabicProductSearchText } from "@/lib/arabicLocalization";
 
 import styles from "./Shop.module.css";
 
@@ -51,6 +52,20 @@ const popularSearches = [
   "Omega-3",
   "Ashwagandha",
 ];
+
+const arabicCatalogLabels: Record<string, string> = {
+  All: "الكل",
+  Protein: "البروتين",
+  Creatine: "الكرياتين",
+  "Pre-Workout": "قبل التمرين",
+  Vitamins: "الفيتامينات",
+  Wellness: "العافية",
+  "Mass Gainer": "زيادة الكتلة",
+  Magnesium: "المغنيسيوم",
+  "Vitamin D3": "فيتامين D3",
+  "Omega-3": "أوميجا-3",
+  Ashwagandha: "أشواجاندا",
+};
 
 const dietaryOptions = [
   "All Diets",
@@ -175,6 +190,7 @@ export default function ShopClient() {
           product.size ?? "",
           getProductForm(product),
           ...getProductHealthGoals(product),
+          getArabicProductSearchText(product),
         ]
           .join(" ")
           .toLowerCase();
@@ -273,7 +289,7 @@ export default function ShopClient() {
               }
               onClick={() => setGoal(item)}
             >
-              <span>{item}</span>
+              <span data-arabic-text={arabicCatalogLabels[item]}>{item}</span>
 
               {item !== "All Goals" && (
                 <small>
@@ -306,7 +322,7 @@ export default function ShopClient() {
               }
               onClick={() => setCategory(item)}
             >
-              <span>{item}</span>
+              <span data-arabic-text={arabicCatalogLabels[item]}>{item}</span>
             </button>
           ))}
         </div>
@@ -323,7 +339,7 @@ export default function ShopClient() {
             }
           >
             {brands.map((item) => (
-              <option key={item}>
+              <option key={item} value={item}>
                 {item}
               </option>
             ))}
@@ -342,7 +358,7 @@ export default function ShopClient() {
             }
           >
             {productForms.map((item) => (
-              <option key={item}>
+              <option key={item} value={item}>
                 {item}
               </option>
             ))}
@@ -361,7 +377,7 @@ export default function ShopClient() {
             }
           >
             {dietaryOptions.map((item) => (
-              <option key={item}>
+              <option key={item} value={item}>
                 {item}
               </option>
             ))}
@@ -387,7 +403,7 @@ export default function ShopClient() {
             }
           >
             {allergenOptions.map((item) => (
-              <option key={item}>
+              <option key={item} value={item}>
                 {item}
               </option>
             ))}
@@ -527,6 +543,7 @@ export default function ShopClient() {
               key={item}
               type="button"
               onClick={() => setSearch(item)}
+              data-arabic-text={arabicCatalogLabels[item]}
             >
               {item}
             </button>
@@ -555,7 +572,7 @@ export default function ShopClient() {
         <div className={styles.productsArea}>
           <div className={styles.resultsTop}>
             <div className={styles.resultCount}>
-              <span>
+              <span data-arabic-text={`${filteredProducts.length} منتج`}>
                 {filteredProducts.length}{" "}
                 {filteredProducts.length === 1
                   ? "PRODUCT"
@@ -663,6 +680,7 @@ export default function ShopClient() {
               onClick={() =>
                 setMobileFiltersOpen(false)
               }
+              data-arabic-text={`عرض ${filteredProducts.length} منتج`}
             >
               SHOW {filteredProducts.length} PRODUCTS
             </button>

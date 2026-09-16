@@ -169,7 +169,7 @@ export const products: Product[] = [
     rating: 4.8,
     reviewCount: 2798,
     image:
-      "/products/categories/ultra-omega-3-transparent.png",
+      "https://s3.images-iherb.com/now/now01662/u/22.jpg",
     size: "180 Softgels",
     stock: 16,
     badge: "Premium",
@@ -326,6 +326,32 @@ export const products: Product[] = [
     stock: 12,
     badge: "Premium Protein",
   },
+  // =========================================================
+  // BIG RAMY LABS
+  // Current public product details sourced from Big Ramy Labs Egypt.
+  // =========================================================
+  {
+    id: "18",
+    slug: "big-ramy-red-rex-creatine-5000mg",
+    brand: "Big Ramy Labs",
+    name: "RED REX Creatine 5000MG Unflavored",
+    shortName: "Red Rex Creatine 5000MG",
+    category: "Creatine",
+    description:
+      "Unflavored creatine monohydrate delivering 5,000 mg (5 g) per serving for strength, power and high-intensity training performance.",
+    price: 449.1,
+    compareAtPrice: 499,
+    rating: 4.9,
+    reviewCount: 176,
+    image:
+      "https://eg.bigramylabs.com/cdn/shop/files/Redrex-_Creatine-_Unflavored-_150_gm_Front.jpg?v=1783934104&width=2000",
+    flavor: "Unflavored",
+    size: "150 G",
+    servings: 30,
+    stock: 20,
+    badge: "New at Vi2",
+  },
+
 ];
 
 export function getProductBySlug(

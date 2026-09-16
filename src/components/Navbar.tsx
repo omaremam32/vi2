@@ -1,10 +1,13 @@
 "use client";
+import { useLanguage } from "@/context/LanguageContext";
+
 
 import Image from "next/image";
 import Link from "next/link";
 import {
   BadgePercent,
   ChevronDown,
+  ChevronLeft,
   ChevronRight,
   Globe2,
   Menu,
@@ -26,28 +29,47 @@ import MobileBottomNav from "@/components/MobileBottomNav";
 import DesktopMegaMenu, { type MegaMenuKey } from "@/components/DesktopMegaMenu";
 import AccountDropdown from "@/components/AccountDropdown";
 import { useCart } from "@/context/CartContext";
+import {
+  getFrontendAccount,
+  isFrontendSignedIn,
+  signOutFrontend,
+} from "@/lib/frontendAuth";
 
 import styles from "./Navbar.module.css";
 
-type Vi2Language =
-  | "en"
-  | "ar";
+
+type MobileCatalogKey =
+  | "vitamins"
+  | "sports"
+  | "botanicals"
+  | "beauty"
+  | "kids"
+  | "health";
 
 export default function Navbar() {
+  const { t } = useLanguage();
+
   const [menuOpen, setMenuOpen] =
     useState(false);
 
   const [searchOpen, setSearchOpen] =
     useState(false);
 
-  const [language, setLanguage] =
-    useState<Vi2Language>("en");
+  const { language, setLanguage } = useLanguage();
 
   const [megaOpen, setMegaOpen] =
     useState<MegaMenuKey | null>(null);
 
   const [accountOpen, setAccountOpen] =
     useState(false);
+
+  const [
+    accountFirstName,
+    setAccountFirstName,
+  ] = useState("");
+
+  const [mobilePanel, setMobilePanel] =
+    useState<MobileCatalogKey | null>(null);
 
   const {
     itemCount,
@@ -56,49 +78,6 @@ export default function Navbar() {
 
   const isArabic =
     language === "ar";
-
-  useEffect(() => {
-    try {
-      const saved =
-        window.localStorage.getItem(
-          "vi2-language",
-        );
-
-      if (
-        saved === "en" ||
-        saved === "ar"
-      ) {
-        setLanguage(saved);
-      }
-    } catch {
-      // English remains fallback.
-    }
-  }, []);
-
-  useEffect(() => {
-    document.documentElement.lang =
-      language;
-
-    document.documentElement.dir =
-      isArabic
-        ? "rtl"
-        : "ltr";
-
-    document.body.dataset.locale =
-      language;
-
-    try {
-      window.localStorage.setItem(
-        "vi2-language",
-        language,
-      );
-    } catch {
-      // Keep current visit language.
-    }
-  }, [
-    isArabic,
-    language,
-  ]);
 
   useEffect(() => {
     document.body.style.overflow =
@@ -141,6 +120,63 @@ export default function Navbar() {
   }, []);
 
   useEffect(() => {
+    function syncAccountName() {
+      try {
+        if (
+          !isFrontendSignedIn()
+        ) {
+          setAccountFirstName("");
+          return;
+        }
+
+        const account =
+          getFrontendAccount();
+
+        setAccountFirstName(
+          account?.firstName?.trim() ??
+            "",
+        );
+      } catch {
+        setAccountFirstName("");
+      }
+    }
+
+    syncAccountName();
+
+    window.addEventListener(
+      "vi2-auth-change",
+      syncAccountName,
+    );
+
+    window.addEventListener(
+      "storage",
+      syncAccountName,
+    );
+
+    window.addEventListener(
+      "focus",
+      syncAccountName,
+    );
+
+    return () => {
+      window.removeEventListener(
+        "vi2-auth-change",
+        syncAccountName,
+      );
+
+      window.removeEventListener(
+        "storage",
+        syncAccountName,
+      );
+
+      window.removeEventListener(
+        "focus",
+        syncAccountName,
+      );
+    };
+  }, []);
+
+  useEffect(() => {
     function handleEscape(
       event: KeyboardEvent,
     ) {
@@ -168,6 +204,7 @@ export default function Navbar() {
 
   function closeMenu() {
     setMenuOpen(false);
+    setMobilePanel(null);
   }
 
   function openSearch() {
@@ -283,32 +320,228 @@ export default function Navbar() {
           "Cart",
       };
 
-  const drawerCategories = [
-    {
-      label:
-        copy.supplements,
-      href:
-        "/shop",
-    },
-    {
-      label:
-        copy.sports,
-      href:
-        "/shop?goal=Muscle%20%26%20Recovery",
-    },
-    {
-      label:
-        copy.vitamins,
-      href:
+  const mobileCatalog = {
+    vitamins: {
+      title: isArabic
+        ? "الفيتامينات والمعادن"
+        : "Vitamins & Minerals",
+      shopAllHref:
         "/shop?category=Vitamins",
+      items: isArabic
+        ? [
+            ["الفيتامينات المتعددة", "/shop?q=Multivitamin"],
+            ["فيتامين C", "/shop?q=Vitamin%20C"],
+            ["فيتامين D3 و K2", "/shop?q=Vitamin%20D3"],
+            ["فيتامينات B المركبة", "/shop?q=B-Complex"],
+            ["المغنيسيوم", "/shop?q=Magnesium"],
+            ["الزنك", "/shop?q=Zinc"],
+            ["الحديد", "/shop?q=Iron"],
+            ["الكالسيوم", "/shop?q=Calcium"],
+          ]
+        : [
+            ["Multivitamins", "/shop?q=Multivitamin"],
+            ["Vitamin C", "/shop?q=Vitamin%20C"],
+            ["Vitamin D3 & K2", "/shop?q=Vitamin%20D3"],
+            ["B-Complex", "/shop?q=B-Complex"],
+            ["Magnesium (Glycinate, Citrate)", "/shop?q=Magnesium"],
+            ["Zinc", "/shop?q=Zinc"],
+            ["Iron", "/shop?q=Iron"],
+            ["Calcium", "/shop?q=Calcium"],
+          ],
+    },
+
+    sports: {
+      title: isArabic
+        ? "التغذية الرياضية"
+        : "Sports Nutrition",
+      shopAllHref:
+        "/shop?goal=Muscle%20%26%20Recovery",
+      items: isArabic
+        ? [
+            ["بروتين مصل اللبن", "/shop?category=Protein"],
+            ["البروتين النباتي", "/shop?q=Plant%20Protein"],
+            ["كرياتين مونوهيدرات", "/shop?category=Creatine"],
+            ["مكملات ما قبل التمرين", "/shop?category=Pre-Workout"],
+            ["BCAA / EAA", "/shop?q=BCAA"],
+            ["جلوتامين", "/shop?q=Glutamine"],
+            ["ماس جينر", "/shop?category=Mass%20Gainer"],
+            ["الإلكتروليتات", "/shop?q=Electrolytes"],
+          ]
+        : [
+            ["Whey Protein (Isolate, Concentrate)", "/shop?category=Protein"],
+            ["Plant Protein", "/shop?q=Plant%20Protein"],
+            ["Creatine Monohydrate", "/shop?category=Creatine"],
+            ["Pre-Workouts", "/shop?category=Pre-Workout"],
+            ["BCAAs / EAAs", "/shop?q=BCAA"],
+            ["Glutamine", "/shop?q=Glutamine"],
+            ["Mass Gainers", "/shop?category=Mass%20Gainer"],
+            ["Electrolytes", "/shop?q=Electrolytes"],
+          ],
+    },
+
+    botanicals: {
+      title: isArabic
+        ? "المكملات والمستخلصات النباتية"
+        : "Supplements & Botanicals",
+      shopAllHref: "/shop",
+      items: isArabic
+        ? [
+            ["أوميجا 3 وزيوت السمك", "/shop?q=Omega"],
+            ["البروبيوتك والبريبيوتك", "/shop?q=Probiotic"],
+            ["ببتيدات الكولاجين", "/shop?q=Collagen"],
+            ["أشواجاندا", "/shop?q=Ashwagandha"],
+            ["حليب الشوك", "/shop?q=Milk%20Thistle"],
+            ["مستخلصات الفطر", "/shop?q=Mushroom"],
+            ["CoQ10", "/shop?q=CoQ10"],
+            ["الكركمين", "/shop?q=Curcumin"],
+          ]
+        : [
+            ["Omega-3 & Fish Oils", "/shop?q=Omega"],
+            ["Probiotics & Prebiotics", "/shop?q=Probiotic"],
+            ["Collagen Peptides", "/shop?q=Collagen"],
+            ["Ashwagandha", "/shop?q=Ashwagandha"],
+            ["Milk Thistle", "/shop?q=Milk%20Thistle"],
+            ["Mushroom Extracts", "/shop?q=Mushroom"],
+            ["CoQ10", "/shop?q=CoQ10"],
+            ["Curcumin", "/shop?q=Curcumin"],
+          ],
+    },
+
+    beauty: {
+      title: isArabic
+        ? "الجمال وصحة البشرة"
+        : "Beauty & Skin Wellness",
+      shopAllHref:
+        "/shop?q=Collagen",
+      items: isArabic
+        ? [
+            ["بيوتين", "/shop?q=Biotin"],
+            ["حمض الهيالورونيك", "/shop?q=Hyaluronic"],
+            ["كولاجين بحري", "/shop?q=Marine%20Collagen"],
+            ["تركيبات مقاومة الشيخوخة", "/shop?q=Anti-Aging"],
+            ["تركيبات الشعر والبشرة والأظافر", "/shop?q=Hair%20Skin%20Nails"],
+          ]
+        : [
+            ["Biotin", "/shop?q=Biotin"],
+            ["Hyaluronic Acid", "/shop?q=Hyaluronic"],
+            ["Marine Collagen", "/shop?q=Marine%20Collagen"],
+            ["Anti-Aging Formulas", "/shop?q=Anti-Aging"],
+            ["Hair, Skin & Nails Blends", "/shop?q=Hair%20Skin%20Nails"],
+          ],
+    },
+
+    kids: {
+      title: isArabic
+        ? "صحة الأطفال والرضع"
+        : "Baby & Kids Health",
+      shopAllHref:
+        "/shop?q=Kids",
+      items: isArabic
+        ? [
+            ["قطرات D3 / بروبيوتك للرضع", "/shop?q=D3"],
+            ["فيتامينات متعددة للأطفال", "/shop?q=Multivitamin"],
+            ["دعم التسنين", "/shop?q=Teething"],
+            ["DHA للأطفال", "/shop?q=DHA"],
+          ]
+        : [
+            ["Infant Drops (D3 / Probiotics)", "/shop?q=D3"],
+            ["Children's Multivitamin Gummies", "/shop?q=Multivitamin"],
+            ["Teething Support", "/shop?q=Teething"],
+            ["DHA for Kids", "/shop?q=DHA"],
+          ],
+    },
+
+    health: {
+      title: isArabic
+        ? "الأهداف الصحية"
+        : "Health Goals",
+      shopAllHref:
+        "/#health-goals",
+      items: isArabic
+        ? [
+            ["العافية العامة وطول العمر", "/shop?goal=Daily%20Wellness"],
+            ["المناعة والدعم الموسمي", "/shop?goal=Immune%20Support"],
+            ["الهضم والتمثيل الغذائي", "/shop?goal=Gut%20Health"],
+            ["القلب والدماغ والدورة الدموية", "/shop?goal=Heart%20Health"],
+            ["العظام والمفاصل والعضلات", "/shop?goal=Muscle%20%26%20Recovery"],
+            ["النوم والمزاج", "/shop?goal=Stress%20%26%20Sleep"],
+            ["مراحل الحياة", "/shop?goal=Daily%20Wellness"],
+            ["أنظمة الجسم والجمال", "/shop?goal=Daily%20Wellness"],
+          ]
+        : [
+            ["General Wellness & Longevity", "/shop?goal=Daily%20Wellness"],
+            ["Immune & Seasonal Support", "/shop?goal=Immune%20Support"],
+            ["Digestion & Metabolism", "/shop?goal=Gut%20Health"],
+            ["Heart, Brain & Circulation", "/shop?goal=Heart%20Health"],
+            ["Bone, Joint & Pain", "/shop?goal=Muscle%20%26%20Recovery"],
+            ["Mind, Sleep & Mood", "/shop?goal=Stress%20%26%20Sleep"],
+            ["Demographics & Stage of Life", "/shop?goal=Daily%20Wellness"],
+            ["Specific Body Systems & Aesthetics", "/shop?goal=Daily%20Wellness"],
+          ],
+    },
+  } satisfies Record<
+    MobileCatalogKey,
+    {
+      title: string;
+      shopAllHref: string;
+      items: string[][];
+    }
+  >;
+
+  const primaryMobileCategories: {
+    key: MobileCatalogKey;
+    label: string;
+  }[] = [
+    {
+      key: "vitamins",
+      label: isArabic
+        ? "الفيتامينات والمعادن"
+        : "Vitamins & Minerals",
     },
     {
-      label:
-        copy.wellness,
-      href:
-        "/shop?category=Wellness",
+      key: "sports",
+      label: copy.sports,
+    },
+    {
+      key: "botanicals",
+      label: isArabic
+        ? "المكملات والمستخلصات النباتية"
+        : "Supplements & Botanicals",
+    },
+    {
+      key: "beauty",
+      label: isArabic
+        ? "الجمال وصحة البشرة"
+        : "Beauty & Skin Wellness",
+    },
+    {
+      key: "kids",
+      label: isArabic
+        ? "صحة الأطفال والرضع"
+        : "Baby & Kids Health",
     },
   ];
+
+  const activeMobilePanel =
+    mobilePanel
+      ? mobileCatalog[mobilePanel]
+      : null;
+
+  const topMessages = isArabic
+    ? [
+        copy.freeShipping,
+        "جودة عالية",
+        "نتائج حقيقية",
+        "علامات موثوقة",
+        "غد أكثر صحة",
+      ]
+    : [
+        copy.freeShipping,
+        "HIGH QUALITY",
+        "REAL RESULTS",
+        "TRUSTED BRANDS",
+        "A HEALTHIER TOMORROW",
+      ];
 
   return (
     <>
@@ -324,19 +557,17 @@ export default function Navbar() {
         <div className={styles.utilityStrip}>
           <div className={styles.utilityInner}>
             <div className={styles.utilityLeft}>
-              <Link href="/#flash-deals">
+              <Link href="/deals">
                 <BadgePercent
                   size={14}
                   strokeWidth={1.45}
                 />
 
                 <span>
-                  {copy.flash}
+                  {t(copy.flash)}
                 </span>
 
-                <strong>
-                  24H PICKS
-                </strong>
+                <strong>{t("24H PICKS")}</strong>
 
                 <ChevronRight
                   size={14}
@@ -350,13 +581,60 @@ export default function Navbar() {
                 }
               />
 
-              <span
+              <div
                 className={
-                  styles.shippingText
+                  styles.topMarquee
+                }
+                aria-label={
+                  t(copy.freeShipping)
                 }
               >
-                {copy.freeShipping}
-              </span>
+                <div
+                  className={
+                    styles.topMarqueeTrack
+                  }
+                >
+                  {t([0, 1].map(
+                    (group) => (
+                      <div
+                        key={
+                          group
+                        }
+                        className={
+                          styles.topMarqueeGroup
+                        }
+                        aria-hidden={
+                          group === 1
+                        }
+                      >
+                        {t(topMessages.map(
+                          (
+                            message,
+                            index,
+                          ) => (
+                            <span
+                              key={`${group}-${message}`}
+                              className={
+                                styles.topMarqueeItem
+                              }
+                            >
+                              {t(message)}
+
+                              {t(index <
+                                topMessages.length -
+                                  1 && (
+                                <i
+                                  aria-hidden="true"
+                                />
+                              ))}
+                            </span>
+                          ),
+                        ))}
+                      </div>
+                    ),
+                  ))}
+                </div>
+              </div>
             </div>
 
             <div className={styles.utilityRight}>
@@ -365,7 +643,7 @@ export default function Navbar() {
                 strokeWidth={1.4}
               />
 
-              <span>EG</span>
+              <span>{t("EG")}</span>
 
               <span
                 className={
@@ -383,9 +661,9 @@ export default function Navbar() {
                   )
                 }
               >
-                {isArabic
+                {t(isArabic
                   ? "EN"
-                  : "AR"}
+                  : "AR")}
               </button>
 
               <span
@@ -394,16 +672,67 @@ export default function Navbar() {
                 }
               />
 
-              <strong>
-                EGP
-              </strong>
+              <strong>{t("EGP")}</strong>
             </div>
           </div>
         </div>
 
         {/* MOBILE PROMO BAR */}
         <div className={styles.mobileAnnouncement}>
-          {copy.freeShipping}
+          <div
+            className={
+              styles.topMarquee
+            }
+            aria-label={
+              t(copy.freeShipping)
+            }
+          >
+            <div
+              className={
+                styles.topMarqueeTrack
+              }
+            >
+              {t([0, 1].map(
+                (group) => (
+                  <div
+                    key={
+                      group
+                    }
+                    className={
+                      styles.topMarqueeGroup
+                    }
+                    aria-hidden={
+                      group === 1
+                    }
+                  >
+                    {t(topMessages.map(
+                      (
+                        message,
+                        index,
+                      ) => (
+                        <span
+                          key={`${group}-${message}`}
+                          className={
+                            styles.topMarqueeItem
+                          }
+                        >
+                          {t(message)}
+
+                          {t(index <
+                            topMessages.length -
+                              1 && (
+                            <i
+                              aria-hidden="true"
+                            />
+                          ))}
+                        </span>
+                      ),
+                    ))}
+                  </div>
+                ),
+              ))}
+            </div>
+          </div>
         </div>
 
         {/* ======================================================
@@ -414,10 +743,11 @@ export default function Navbar() {
             <button
               type="button"
               className={styles.mobileMenuButton}
-              aria-label={copy.menu}
-              onClick={() =>
-                setMenuOpen(true)
-              }
+              aria-label={t(copy.menu)}
+              onClick={() => {
+                setMobilePanel(null);
+                setMenuOpen(true);
+              }}
             >
               <Menu
                 size={23}
@@ -428,11 +758,11 @@ export default function Navbar() {
             <Link
               href="/"
               className={styles.logo}
-              aria-label="Vi2 home"
+              aria-label={t("Vi2 home")}
             >
               <Image
                 src="/brand/vi2-logo-mark-black.png"
-                alt="Vi2"
+                alt={t("Vi2")}
                 width={58}
                 height={70}
                 priority
@@ -443,10 +773,10 @@ export default function Navbar() {
               type="button"
               className={styles.searchBar}
               onClick={openSearch}
-              aria-label="Search Vi2"
+              aria-label={t("Search Vi2")}
             >
               <span>
-                {copy.search}
+                {t(copy.search)}
               </span>
 
               <Search
@@ -484,11 +814,12 @@ export default function Navbar() {
 
                 <div>
                   <span>
-                    {copy.account}
+                    {t(copy.account)}
                   </span>
 
                   <strong>
-                    {copy.signIn}
+                    {t(accountFirstName ||
+                      copy.signIn)}
                   </strong>
                 </div>
 
@@ -511,7 +842,7 @@ export default function Navbar() {
             <button
               type="button"
               className={styles.cart}
-              aria-label={copy.cart}
+              aria-label={t(copy.cart)}
               onClick={openCart}
             >
               <ShoppingBag
@@ -519,15 +850,15 @@ export default function Navbar() {
                 strokeWidth={1.4}
               />
 
-              {itemCount > 0 && (
+              {t(itemCount > 0 && (
                 <span
                   className={
                     styles.cartCount
                   }
                 >
-                  {itemCount}
+                  {t(itemCount)}
                 </span>
-              )}
+              ))}
             </button>
           </div>
         </div>
@@ -559,7 +890,7 @@ export default function Navbar() {
                   )
                 }
               >
-                {copy.supplements}
+                {t(copy.supplements)}
               </button>
 
               <button
@@ -583,7 +914,7 @@ export default function Navbar() {
                   )
                 }
               >
-                {copy.sports}
+                {t(copy.sports)}
               </button>
 
               <button
@@ -607,7 +938,7 @@ export default function Navbar() {
                   )
                 }
               >
-                {copy.vitamins}
+                {t(copy.vitamins)}
               </button>
 
               <button
@@ -631,7 +962,7 @@ export default function Navbar() {
                   )
                 }
               >
-                {copy.wellness}
+                {t(copy.wellness)}
               </button>
 
               <span
@@ -640,36 +971,47 @@ export default function Navbar() {
                 }
               />
 
-              <Link href="/shop">
-                {copy.brands}
+              <Link
+                href="/brands"
+                onMouseEnter={() =>
+                  setMegaOpen("brands")
+                }
+                onFocus={() =>
+                  setMegaOpen("brands")
+                }
+                onClick={() =>
+                  setMegaOpen(null)
+                }
+              >
+                {t(copy.brands)}
               </Link>
 
               <Link href="/#health-goals">
-                {copy.health}
+                {t(copy.health)}
               </Link>
             </div>
 
             <div className={styles.categoryPromos}>
               <Link
-                href="/#flash-deals"
+                href="/deals"
                 className={styles.dealLink}
               >
-                {copy.deals}
+                {t(copy.deals)}
               </Link>
 
-              <Link href="/shop?sort=rating">
-                {copy.best}
+              <Link href="/#best-sellers">
+                {t(copy.best)}
               </Link>
 
               <Link href="/shop">
-                {copy.new}
+                {t(copy.new)}
               </Link>
 
               <Link
                 href="/#value-sets"
                 className={styles.bundleLink}
               >
-                {copy.bundles}
+                {t(copy.bundles)}
               </Link>
             </div>
           </div>
@@ -684,7 +1026,9 @@ export default function Navbar() {
       </header>
 
       {/* ======================================================
-          SIDE DRAWER
+          MOBILE TWO-LEVEL CATALOG DRAWER
+          Concept inspired by large catalog commerce navigation,
+          styled completely in Vi2 cream / olive / black.
           ====================================================== */}
       <div
         className={
@@ -710,9 +1054,14 @@ export default function Navbar() {
             event.stopPropagation()
           }
         >
+          {/* ROOT MENU HEADER */}
           <div className={styles.drawerHeader}>
             <Link
-              href="/account/sign-in"
+              href={
+                accountFirstName
+                  ? "/account"
+                  : "/account/sign-in"
+              }
               className={styles.welcome}
               onClick={closeMenu}
             >
@@ -722,7 +1071,11 @@ export default function Navbar() {
               />
 
               <strong>
-                {copy.welcome}
+                {t(accountFirstName
+                  ? isArabic
+                    ? `مرحباً، ${accountFirstName}`
+                    : `Welcome, ${accountFirstName}`
+                  : copy.welcome)}
               </strong>
             </Link>
 
@@ -730,7 +1083,7 @@ export default function Navbar() {
               type="button"
               className={styles.closeButton}
               onClick={closeMenu}
-              aria-label="Close menu"
+              aria-label={t("Close menu")}
             >
               <X
                 size={25}
@@ -739,60 +1092,67 @@ export default function Navbar() {
             </button>
           </div>
 
+          {/* ROOT MENU */}
           <div className={styles.drawerScroll}>
             <section className={styles.menuSection}>
               <span className={styles.sectionLabel}>
-                {copy.categories}
+                {t(copy.categories)}
               </span>
 
-              <nav className={styles.simpleLinks}>
-                {drawerCategories.map(
+              <nav className={styles.primaryMenuList}>
+                {t(primaryMobileCategories.map(
                   (item) => (
-                    <Link
-                      key={item.href}
-                      href={item.href}
-                      onClick={closeMenu}
+                    <button
+                      key={item.key}
+                      type="button"
+                      className={styles.primaryMenuButton}
+                      onClick={() =>
+                        setMobilePanel(item.key)
+                      }
                     >
                       <span>
-                        {item.label}
+                        {t(item.label)}
                       </span>
 
                       <ChevronRight
                         size={20}
-                        strokeWidth={1.5}
+                        strokeWidth={1.45}
                       />
-                    </Link>
+                    </button>
                   ),
-                )}
+                ))}
               </nav>
             </section>
 
             <section className={styles.menuSection}>
               <span className={styles.sectionLabel}>
-                {copy.shopBy}
+                {t(copy.shopBy)}
               </span>
 
               <nav className={styles.simpleLinks}>
-                <Link
-                  href="/#health-goals"
-                  onClick={closeMenu}
+                <button
+                  type="button"
+                  className={styles.simpleMenuButton}
+                  onClick={() =>
+                    setMobilePanel("health")
+                  }
                 >
                   <span className={styles.linkWithIcon}>
                     <Sparkles
                       size={18}
                       strokeWidth={1.4}
                     />
-                    {copy.health}
+                    {t(copy.health)}
                   </span>
 
                   <ChevronRight
                     size={20}
                     strokeWidth={1.5}
                   />
-                </Link>
+                </button>
 
                 <Link
-                  href="/shop"
+                  href="/brands"
                   onClick={closeMenu}
                 >
                   <span className={styles.linkWithIcon}>
@@ -800,7 +1160,7 @@ export default function Navbar() {
                       size={18}
                       strokeWidth={1.4}
                     />
-                    {copy.brands}
+                    {t(copy.brands)}
                   </span>
 
                   <ChevronRight
@@ -810,7 +1170,7 @@ export default function Navbar() {
                 </Link>
 
                 <Link
-                  href="/#flash-deals"
+                  href="/deals"
                   onClick={closeMenu}
                   className={styles.accentLink}
                 >
@@ -819,7 +1179,7 @@ export default function Navbar() {
                       size={18}
                       strokeWidth={1.4}
                     />
-                    {copy.deals}
+                    {t(copy.deals)}
                   </span>
 
                   <ChevronRight
@@ -829,7 +1189,7 @@ export default function Navbar() {
                 </Link>
 
                 <Link
-                  href="/shop?sort=rating"
+                  href="/#best-sellers"
                   onClick={closeMenu}
                 >
                   <span className={styles.linkWithIcon}>
@@ -837,7 +1197,7 @@ export default function Navbar() {
                       size={18}
                       strokeWidth={1.4}
                     />
-                    {copy.best}
+                    {t(copy.best)}
                   </span>
 
                   <ChevronRight
@@ -855,7 +1215,7 @@ export default function Navbar() {
                       size={18}
                       strokeWidth={1.4}
                     />
-                    {copy.bundles}
+                    {t(copy.bundles)}
                   </span>
 
                   <ChevronRight
@@ -868,36 +1228,48 @@ export default function Navbar() {
 
             <section className={styles.accountSection}>
               <Link
-                href="/account"
+                href={
+                  accountFirstName
+                    ? "/account"
+                    : "/account/sign-in?next=/account"
+                }
                 onClick={closeMenu}
               >
                 <UserRound
                   size={19}
                   strokeWidth={1.4}
                 />
-                {copy.account}
+                {t(copy.account)}
               </Link>
 
               <Link
-                href="/account"
+                href={
+                  accountFirstName
+                    ? "/account"
+                    : "/account/sign-in?next=/account"
+                }
                 onClick={closeMenu}
               >
                 <Package
                   size={19}
                   strokeWidth={1.4}
                 />
-                {copy.orders}
+                {t(copy.orders)}
               </Link>
 
               <Link
-                href="/account"
+                href={
+                  accountFirstName
+                    ? "/account#rewards"
+                    : "/account/sign-in?next=/account%23rewards"
+                }
                 onClick={closeMenu}
               >
                 <Sparkles
                   size={19}
                   strokeWidth={1.4}
                 />
-                {copy.rewards}
+                {t(copy.rewards)}
               </Link>
             </section>
 
@@ -907,7 +1279,7 @@ export default function Navbar() {
                 strokeWidth={1.4}
               />
 
-              <span>EG</span>
+              <span>{t("EG")}</span>
 
               <span
                 className={
@@ -925,9 +1297,9 @@ export default function Navbar() {
                   )
                 }
               >
-                {isArabic
+                {t(isArabic
                   ? "EN"
-                  : "AR"}
+                  : "AR")}
               </button>
 
               <span
@@ -936,19 +1308,122 @@ export default function Navbar() {
                 }
               />
 
-              <strong>
-                EGP
-              </strong>
+              <strong>{t("EGP")}</strong>
             </div>
+
+            {t(accountFirstName ? (
+              <button
+                type="button"
+                className={styles.drawerCta}
+                onClick={() => {
+                  signOutFrontend();
+                  setAccountFirstName("");
+                  closeMenu();
+
+                  window.location.href = "/";
+                }}
+                style={{
+                  width: "calc(100% - 36px)",
+                  border: 0,
+                  fontFamily: "inherit",
+                  cursor: "pointer",
+                }}
+              >
+                {t(isArabic
+                  ? "تسجيل الخروج"
+                  : "LOG OUT")}
+              </button>
+            ) : (
+              <Link
+                href="/account/sign-in"
+                className={styles.drawerCta}
+                onClick={closeMenu}
+              >
+                {t(copy.create)}
+              </Link>
+            ))}
           </div>
 
-          <Link
-            href="/account/sign-in"
-            className={styles.drawerCta}
-            onClick={closeMenu}
+          {/* SECOND LEVEL PANEL */}
+          <div
+            key={mobilePanel ?? "root"}
+            className={
+              activeMobilePanel
+                ? `${styles.subMenuPanel} ${styles.subMenuPanelOpen}`
+                : styles.subMenuPanel
+            }
+            aria-hidden={!activeMobilePanel}
           >
-            {copy.create}
-          </Link>
+            {t(activeMobilePanel && (
+              <>
+                <div className={styles.subMenuHeader}>
+                  <button
+                    type="button"
+                    className={styles.backButton}
+                    onClick={() =>
+                      setMobilePanel(null)
+                    }
+                  >
+                    <ChevronLeft
+                      size={22}
+                      strokeWidth={1.45}
+                    />
+
+                    <span>
+                      {t(isArabic
+                        ? "رجوع"
+                        : "Back")}
+                    </span>
+                  </button>
+
+                  <button
+                    type="button"
+                    className={styles.closeButton}
+                    onClick={closeMenu}
+                    aria-label={t("Close menu")}
+                  >
+                    <X
+                      size={25}
+                      strokeWidth={1.4}
+                    />
+                  </button>
+                </div>
+
+                <div className={styles.subMenuScroll}>
+                  <div className={styles.subMenuTitleRow}>
+                    <h2>
+                      {t(activeMobilePanel.title)}
+                    </h2>
+
+                    <Link
+                      href={
+                        activeMobilePanel.shopAllHref
+                      }
+                      onClick={closeMenu}
+                    >
+                      {t(isArabic
+                        ? "عرض الكل"
+                        : "Shop all")}
+                    </Link>
+                  </div>
+
+                  <nav className={styles.subMenuList}>
+                    {t(activeMobilePanel.items.map(
+                      ([label, href]) => (
+                        <Link
+                          key={`${label}-${href}`}
+                          href={href}
+                          onClick={closeMenu}
+                        >
+                          {t(label)}
+                        </Link>
+                      ),
+                    ))}
+                  </nav>
+                </div>
+              </>
+            ))}
+          </div>
         </aside>
       </div>
 

@@ -1,53 +1,85 @@
-.goalsSection,
-.bestSection {
-  padding:
-    82px
-    max(
-      32px,
-      calc(
-        (100vw - 1440px) /
-        2
-      )
-    );
+.section {
+  overflow: hidden;
 
   color: #181916;
-  background: #fbfaf7;
-}
+  background:
+    radial-gradient(
+      circle at 50% 66%,
+      rgba(
+        98,
+        106,
+        85,
+        0.07
+      ),
+      transparent 25%
+    ),
+    #f6f1e9;
 
-.bestSection {
-  padding-top: 34px;
-  padding-bottom: 54px;
+  border-top:
+    1px solid
+    rgba(
+      24,
+      25,
+      22,
+      0.08
+    );
 
   border-bottom:
     1px solid
-    rgba(24,25,22,0.12);
-
-  background: #fbfaf7;
+    rgba(
+      24,
+      25,
+      22,
+      0.08
+    );
 }
 
-.compactHeading {
-  margin-bottom: 22px;
+.shell {
+  width:
+    min(
+      calc(
+        100% - 64px
+      ),
+      1440px
+    );
 
+  margin: 0 auto;
+
+  padding:
+    42px
+    0
+    46px;
+}
+
+.header {
   display: flex;
   align-items: flex-end;
-  justify-content: space-between;
+  justify-content:
+    space-between;
 
-  gap: 24px;
+  gap: 40px;
 }
 
-.compactHeading > div > span {
+.heading > span {
   display: block;
 
-  margin-bottom: 5px;
+  margin-bottom: 8px;
 
-  color: #777168;
+  color: #626a55;
 
   font-size: 7px;
-  font-weight: 800;
-  letter-spacing: 0.13em;
+  font-weight: 850;
+  letter-spacing: 0.18em;
 }
 
-.compactHeading h2 {
+.headingLine {
+  display: flex;
+  align-items: flex-end;
+
+  gap: 31px;
+}
+
+.heading h2 {
   margin: 0;
 
   font-family:
@@ -56,16 +88,47 @@
 
   font-size:
     clamp(
-      42px,
-      4.4vw,
-      67px
+      57px,
+      5.3vw,
+      79px
     );
+
   font-weight: 400;
-  line-height: 0.88;
+  line-height: 0.78;
 }
 
-.compactHeading > a {
-  padding-bottom: 6px;
+.promise {
+  margin-bottom: 3px;
+
+  display: flex;
+  align-items: stretch;
+
+  gap: 18px;
+}
+
+.promise i {
+  width: 1px;
+
+  background:
+    rgba(
+      24,
+      25,
+      22,
+      0.2
+    );
+}
+
+.promise p {
+  margin: 0;
+
+  color: #5f5c55;
+
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.viewAll {
+  padding-bottom: 8px;
 
   display: inline-flex;
   align-items: center;
@@ -79,478 +142,672 @@
   color: #181916;
 
   font-size: 7px;
-  font-weight: 800;
-  letter-spacing: 0.1em;
-}
-
-.heading {
-  margin-bottom: 34px;
-
-  display: flex;
-  align-items: flex-end;
-  justify-content: space-between;
-
-  gap: 28px;
-}
-
-.heading > div > span,
-.brandIntro > span,
-.dailyStrip span {
-  display: block;
-
-  margin-bottom: 12px;
-
-  font-size: 8px;
-  font-weight: 800;
-  letter-spacing: 0.16em;
-}
-
-.heading h2,
-.brandIntro h2 {
-  margin: 0;
-
-  font-family:
-    var(--font-display),
-    sans-serif;
-
-  font-size:
-    clamp(
-      62px,
-      7vw,
-      112px
-    );
-  font-weight: 400;
-  line-height: 0.79;
-}
-
-.heading > a,
-.dailyStrip > a {
-  padding-bottom: 8px;
-
-  display: inline-flex;
-  align-items: center;
-
-  gap: 13px;
-
-  border-bottom:
-    1px solid
-    #181916;
-
-  color: #181916;
-
-  font-size: 8px;
-  font-weight: 800;
+  font-weight: 850;
   letter-spacing: 0.12em;
 }
 
-.productGrid {
-  display: grid;
-  grid-template-columns:
-    repeat(
-      4,
-      minmax(0, 1fr)
-    );
+.orbit {
+  position: relative;
 
-  gap: 1px;
+  margin-top: 34px;
 
-  background:
-    rgba(24,25,22,0.13);
+  padding:
+    17px
+    0
+    0;
 }
 
-.goalGrid {
-  display: grid;
-  grid-template-columns:
-    repeat(3, 1fr);
+.orbitLine {
+  position: absolute;
+
+  z-index: 0;
+
+  top: 80px;
+  left: 2.5%;
+  right: 2.5%;
+
+  height: 1px;
+
+  background:
+    linear-gradient(
+      90deg,
+      rgba(
+        98,
+        106,
+        85,
+        0.08
+      ),
+      rgba(
+        98,
+        106,
+        85,
+        0.55
+      ) 15%,
+      rgba(
+        98,
+        106,
+        85,
+        0.55
+      ) 85%,
+      rgba(
+        98,
+        106,
+        85,
+        0.08
+      )
+    );
+}
+
+.orbitLine::before {
+  content: "";
+
+  position: absolute;
+
+  top: -11px;
+  left: 50%;
+
+  width: 72%;
+  height: 22px;
 
   border-top:
     1px solid
-    rgba(24,25,22,0.14);
+    rgba(
+      98,
+      106,
+      85,
+      0.2
+    );
 
-  border-left:
-    1px solid
-    rgba(24,25,22,0.14);
+  border-radius:
+    50%;
+
+  transform:
+    translateX(-50%);
 }
 
-.goalCard {
+.orbitLine span {
+  position: absolute;
+
+  top: 50%;
+
+  width: 7px;
+  height: 7px;
+
+  border-radius: 50%;
+
+  background: #626a55;
+
+  transform:
+    translateY(-50%);
+}
+
+.orbitLine span:nth-child(1) {
+  left: 0;
+}
+
+.orbitLine span:nth-child(2) {
+  left: 50%;
+}
+
+.orbitLine span:nth-child(3) {
+  right: 0;
+}
+
+.goalRail {
   position: relative;
 
-  min-height: 250px;
+  z-index: 1;
 
-  padding: 24px;
+  display: grid;
+  grid-template-columns:
+    repeat(
+      6,
+      minmax(
+        0,
+        1fr
+      )
+    );
+
+  align-items: start;
+
+  gap: 7px;
+}
+
+.goal {
+  position: relative;
+
+  min-width: 0;
+
+  padding: 0;
 
   display: flex;
   flex-direction: column;
-  justify-content:
-    space-between;
+  align-items: center;
 
-  border-right:
-    1px solid
-    rgba(24,25,22,0.14);
+  border: 0;
 
-  border-bottom:
+  color: inherit;
+  background: transparent;
+
+  cursor: pointer;
+}
+
+.iconCircle {
+  position: relative;
+
+  z-index: 4;
+
+  width: 80px;
+  height: 80px;
+
+  display: grid;
+  place-items: center;
+
+  border:
     1px solid
-    rgba(24,25,22,0.14);
+    rgba(
+      24,
+      25,
+      22,
+      0.08
+    );
+
+  border-radius: 50%;
 
   color: #181916;
-  background: #f4eee5;
+  background: #ede6dc;
+
+  box-shadow:
+    0 7px 20px
+    rgba(
+      24,
+      25,
+      22,
+      0.04
+    );
 
   transition:
-    background-color
-      180ms ease,
-    transform
-      180ms ease;
+    color 220ms ease,
+    background 220ms ease,
+    transform 220ms ease,
+    box-shadow 220ms ease;
 }
 
-.goalCard:nth-child(2),
-.goalCard:nth-child(5) {
-  background: #d9d2c7;
-}
-
-.goalCard:nth-child(3),
-.goalCard:nth-child(6) {
-  color: #f8f3ea;
-  background: #6c735c;
-}
-
-.goalCard:hover {
-  z-index: 2;
-
+.goal:hover
+.iconCircle {
   transform:
     translateY(-4px);
-}
 
-.goalTop {
-  display: flex;
-  align-items: center;
-  justify-content:
-    space-between;
-}
-
-.goalTop > span {
-  font-size: 8px;
-  font-weight: 800;
-  letter-spacing: 0.12em;
-}
-
-.goalCard h3 {
-  margin: 0;
-
-  font-family:
-    var(--font-display),
-    sans-serif;
-
-  font-size:
-    clamp(
-      38px,
-      3.4vw,
-      58px
+  box-shadow:
+    0 13px 26px
+    rgba(
+      24,
+      25,
+      22,
+      0.08
     );
-  font-weight: 400;
-  line-height: 0.9;
 }
 
-.goalCard p {
-  max-width: 280px;
+.goal > strong {
+  position: relative;
 
-  margin: 10px 0 0;
+  z-index: 5;
 
-  opacity: 0.72;
+  margin-top: 17px;
 
-  font-size: 10px;
-  line-height: 1.6;
+  font-size: 8px;
+  line-height: 1.2;
+  letter-spacing: 0.12em;
+
+  text-align: center;
 }
 
-.goalArrow {
+.short {
+  position: relative;
+
+  z-index: 5;
+
+  margin-top: 6px;
+
+  color: #777167;
+
+  font-size: 8px;
+  line-height: 1.4;
+
+  text-align: center;
+}
+
+.activeGoal {
+  z-index: 7;
+}
+
+.activeGoal
+.iconCircle {
+  width: 94px;
+  height: 94px;
+
+  margin-top: -7px;
+
+  color: #f7f2ea;
+  background: #4f5943;
+
+  border-color:
+    rgba(
+      255,
+      255,
+      255,
+      0.6
+    );
+
+  box-shadow:
+    0 18px 45px
+    rgba(
+      54,
+      62,
+      46,
+      0.23
+    );
+}
+
+.activeBackdrop {
   position: absolute;
 
-  right: 22px;
-  bottom: 22px;
+  z-index: 1;
 
-  opacity: 0;
+  top: -69px;
+  left: 50%;
 
-  transition:
-    opacity 160ms ease,
-    transform 160ms ease;
-}
+  width: 188px;
+  height: 188px;
 
-.goalCard:hover
-  .goalArrow {
-  opacity: 1;
+  border-radius: 50%;
 
   transform:
-    translateX(3px);
+    translateX(-50%);
+
+  pointer-events: none;
 }
 
-.brandSection {
-  display: grid;
-  grid-template-columns:
-    0.85fr 1.15fr;
+.ringOne,
+.ringTwo {
+  position: absolute;
 
-  color: #f7f3ed;
-  background: #1c1e1a;
-}
+  left: 50%;
+  top: 50%;
 
-.brandIntro {
-  padding:
-    80px
-    clamp(
-      32px,
-      5vw,
-      80px
+  border-radius: 50%;
+
+  transform:
+    translate(
+      -50%,
+      -50%
     );
-
-  border-right:
-    1px solid
-    rgba(247,243,237,0.15);
 }
 
-.brandIntro p {
-  max-width: 430px;
+.ringOne {
+  width: 176px;
+  height: 176px;
 
-  margin: 28px 0 0;
+  background:
+    rgba(
+      98,
+      106,
+      85,
+      0.08
+    );
+}
+
+.ringTwo {
+  width: 153px;
+  height: 153px;
+
+  border:
+    12px solid
+    rgba(
+      98,
+      106,
+      85,
+      0.1
+    );
+}
+
+.athlete {
+  position: absolute;
+
+  inset:
+    14px
+    13px
+    34px
+    13px;
+
+  overflow: hidden;
+
+  border-radius:
+    50%
+    50%
+    46%
+    46%;
+
+  opacity: 0.95;
+}
+
+.athleteImage {
+  object-fit: cover;
+  object-position:
+    59% 40%;
+
+  filter:
+    grayscale(1)
+    contrast(1.04);
+}
+
+.stronger {
+  position: absolute;
+
+  z-index: 3;
+
+  top: 32px;
+  left: 27px;
 
   color:
-    rgba(247,243,237,0.65);
+    rgba(
+      248,
+      244,
+      237,
+      0.92
+    );
 
-  font-size: 11px;
-  line-height: 1.75;
+  font-size: 7px;
+  font-weight: 850;
+  line-height: 1.5;
+  letter-spacing: 0.24em;
 }
 
-.brandList {
+.activeSummary {
+  width:
+    min(
+      520px,
+      100%
+    );
+
+  margin:
+    24px auto
+    0;
+
   display: grid;
   grid-template-columns:
-    repeat(2, 1fr);
-}
-
-.brandItem {
-  min-height: 120px;
-
-  padding: 24px 28px;
-
-  display: grid;
-  grid-template-columns:
-    auto 1fr auto;
+    auto
+    1fr
+    auto;
 
   align-items: center;
 
   gap: 16px;
 
-  border-right:
-    1px solid
-    rgba(247,243,237,0.13);
-
-  border-bottom:
-    1px solid
-    rgba(247,243,237,0.13);
-
-  color: #f7f3ed;
-
-  transition:
-    background-color
-    160ms ease;
-}
-
-.brandItem:hover {
-  background: #555c49;
-}
-
-.brandItem > span {
-  color:
-    rgba(247,243,237,0.45);
-
-  font-size: 7px;
-  font-weight: 800;
-}
-
-.brandItem strong {
-  font-family:
-    var(--font-display),
-    sans-serif;
-
-  font-size:
-    clamp(
-      24px,
-      2.1vw,
-      36px
-    );
-  font-weight: 400;
-}
-
-.dailyStrip {
-  min-height: 126px;
-
   padding:
-    28px
-    max(
-      32px,
-      calc(
-        (100vw - 1440px) /
-        2
-      )
+    12px
+    14px;
+
+  border:
+    1px solid
+    rgba(
+      24,
+      25,
+      22,
+      0.08
     );
 
-  display: grid;
-  grid-template-columns:
-    1fr 1fr auto;
+  border-radius: 999px;
 
+  background:
+    rgba(
+      255,
+      252,
+      247,
+      0.78
+    );
+
+  backdrop-filter:
+    blur(10px);
+}
+
+.activeMeta {
+  display: inline-flex;
   align-items: center;
 
-  gap: 28px;
+  gap: 6px;
 
-  border-bottom:
-    1px solid
-    rgba(24,25,22,0.12);
+  color: #626a55;
 
-  color: #181916;
-  background: #cbc1b3;
+  font-size: 5.3px;
+  font-weight: 850;
+  letter-spacing: 0.11em;
 }
 
-.dailyStrip strong {
-  font-family:
-    var(--font-display),
-    sans-serif;
+.activeCopy {
+  display: flex;
+  align-items: center;
 
-  font-size: 31px;
-  font-weight: 400;
+  gap: 9px;
 }
 
-.dailyStrip p {
-  max-width: 440px;
-
+.activeCopy p {
   margin: 0;
 
-  color: #5f5a53;
+  color: #5d5952;
 
-  font-size: 10px;
-  line-height: 1.6;
+  font-size: 7px;
+  line-height: 1.45;
 }
 
-@media (max-width: 1050px) {
-  .goalGrid {
-    grid-template-columns:
-      repeat(2, 1fr);
+.shopNow {
+  min-height: 34px;
+
+  padding:
+    0
+    16px;
+
+  display: inline-flex;
+  align-items: center;
+
+  gap: 8px;
+
+  border-radius: 999px;
+
+  color: #f7f2ea;
+  background: #4f5943;
+
+  font-size: 6px;
+  font-weight: 850;
+  letter-spacing: 0.1em;
+}
+
+@media (max-width: 980px) {
+  .shell {
+    width:
+      calc(
+        100% - 36px
+      );
   }
 
-  .productGrid {
-    grid-template-columns:
-      repeat(2, 1fr);
+  .headingLine {
+    gap: 22px;
   }
 
-  .brandSection {
-    grid-template-columns:
-      1fr;
+  .promise {
+    display: none;
   }
 
-  .brandIntro {
-    border-right: 0;
+  .goal > strong {
+    font-size: 7px;
+  }
 
-    border-bottom:
-      1px solid
-      rgba(247,243,237,0.15);
+  .short {
+    font-size: 7px;
   }
 }
 
 @media (max-width: 700px) {
-  .goalsSection {
-    padding:
-      54px
-      14px;
-  }
+  .shell {
+    width: 100%;
 
-  .bestSection {
     padding:
       28px
-      10px
-      42px;
+      0
+      31px;
   }
 
-  .compactHeading {
-    margin-bottom: 16px;
-  }
-
-  .compactHeading h2 {
-    font-size: 45px;
-  }
-
-  .compactHeading > a {
-    font-size: 6px;
-  }
-
-  .heading {
-    margin-bottom: 22px;
+  .header {
+    padding:
+      0
+      14px;
 
     align-items: flex-end;
+
+    gap: 13px;
   }
 
-  .heading h2,
-  .brandIntro h2 {
-    font-size:
-      clamp(
-        54px,
-        16vw,
-        78px
-      );
+  .heading > span {
+    margin-bottom: 6px;
+
+    font-size: 5.5px;
   }
 
-  .heading > a {
-    font-size: 7px;
+  .heading h2 {
+    font-size: 47px;
   }
 
-  .goalGrid {
-    grid-template-columns: 1fr;
+  .viewAll {
+    font-size: 5.5px;
   }
 
-  .goalCard {
-    min-height: 190px;
+  .orbit {
+    margin-top: 24px;
 
-    padding: 18px;
+    padding-top: 0;
   }
 
-  .goalCard h3 {
-    font-size: 45px;
+  .orbitLine {
+    display: none;
   }
 
-  .productGrid {
-    grid-template-columns:
-      repeat(
-        2,
-        minmax(0, 1fr)
-      );
-  }
-
-  .brandIntro {
+  .goalRail {
     padding:
-      54px
-      18px;
+      38px
+      14px
+      12px;
+
+    display: flex;
+
+    gap: 10px;
+
+    overflow-x: auto;
+
+    scroll-snap-type:
+      x mandatory;
+
+    scrollbar-width: none;
   }
 
-  .brandList {
+  .goalRail::-webkit-scrollbar {
+    display: none;
+  }
+
+  .goal {
+    flex:
+      0 0
+      118px;
+
+    scroll-snap-align:
+      center;
+  }
+
+  .iconCircle {
+    width: 68px;
+    height: 68px;
+  }
+
+  .activeGoal
+  .iconCircle {
+    width: 78px;
+    height: 78px;
+
+    margin-top: -5px;
+  }
+
+  .activeBackdrop {
+    top: -42px;
+
+    width: 135px;
+    height: 135px;
+  }
+
+  .ringOne {
+    width: 128px;
+    height: 128px;
+  }
+
+  .ringTwo {
+    width: 111px;
+    height: 111px;
+
+    border-width: 9px;
+  }
+
+  .athlete {
+    inset:
+      10px
+      10px
+      25px;
+  }
+
+  .stronger {
+    top: 22px;
+    left: 18px;
+
+    font-size: 5px;
+  }
+
+  .goal > strong {
+    margin-top: 13px;
+
+    font-size: 6.2px;
+  }
+
+  .short {
+    font-size: 6.1px;
+  }
+
+  .activeSummary {
+    width:
+      calc(
+        100% - 28px
+      );
+
+    margin-top: 10px;
+
     grid-template-columns:
-      1fr;
+      1fr
+      auto;
+
+    border-radius: 18px;
   }
 
-  .brandItem {
-    min-height: 88px;
-
-    padding: 18px;
+  .activeMeta {
+    display: none;
   }
 
-  .dailyStrip {
+  .activeCopy p {
+    font-size: 6.5px;
+  }
+
+  .shopNow {
+    min-height: 32px;
+
     padding:
-      28px
-      16px;
+      0
+      13px;
 
-    grid-template-columns:
-      1fr;
-
-    gap: 15px;
-  }
-
-  .dailyStrip strong {
-    font-size: 28px;
-  }
-
-  .dailyStrip > a {
-    width: fit-content;
+    font-size: 5.5px;
   }
 }

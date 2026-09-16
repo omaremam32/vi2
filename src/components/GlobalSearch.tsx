@@ -22,6 +22,7 @@ import { products } from "@/data/products";
 import {
   getProductHealthGoals,
 } from "@/lib/catalogMeta";
+import { getArabicProductSearchText } from "@/lib/arabicLocalization";
 
 import styles from "./GlobalSearch.module.css";
 
@@ -39,6 +40,15 @@ const popularSearches = [
   "Omega-3",
   "Ashwagandha",
 ];
+
+const arabicPopularSearches: Record<string, string> = {
+  Creatine: "الكرياتين",
+  Protein: "البروتين",
+  Magnesium: "المغنيسيوم",
+  "Vitamin D3": "فيتامين D3",
+  "Omega-3": "أوميجا-3",
+  Ashwagandha: "أشواجاندا",
+};
 
 function formatPrice(
   value: number,
@@ -145,6 +155,7 @@ export default function GlobalSearch({
             ...getProductHealthGoals(
               product,
             ),
+            getArabicProductSearchText(product),
           ]
             .join(" ")
             .toLowerCase();
@@ -467,6 +478,7 @@ export default function GlobalSearch({
                         item,
                       )
                     }
+                    data-arabic-text={arabicPopularSearches[item]}
                   >
                     {item}
                   </button>

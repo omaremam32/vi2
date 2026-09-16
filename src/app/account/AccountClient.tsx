@@ -113,7 +113,7 @@ export default function AccountClient() {
         <div>
           <span>VI2 ACCOUNT</span>
 
-          <h1>
+          <h1 data-arabic-text="عافيتك.">
             YOUR
             <br />
             WELLNESS.

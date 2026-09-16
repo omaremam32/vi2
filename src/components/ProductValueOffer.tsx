@@ -46,7 +46,7 @@ export default function ProductValueOffer({
       <div className={styles.copy}>
         <span>STACKABLE VALUE SET</span>
 
-        <h2>
+        <h2 data-arabic-text="أكمل روتينك.">
           COMPLETE
           <br />
           THE ROUTINE.

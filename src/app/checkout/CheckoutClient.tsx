@@ -3,6 +3,7 @@
 import Link from "next/link";
 import {
   ArrowLeft,
+  ArrowRight,
   Check,
   CheckCircle2,
   ChevronDown,
@@ -10,18 +11,13 @@ import {
   Landmark,
   PackageCheck,
   ShieldCheck,
-  Smartphone,
   Truck,
   WalletCards,
 } from "lucide-react";
 import {
-  useEffect,
   useMemo,
   useRef,
   useState,
-} from "react";
-import type {
-  FormEvent,
 } from "react";
 import {
   useRouter,
@@ -42,9 +38,21 @@ type CheckoutItem = {
 type PaymentMethod =
   | "cod"
   | "card"
-  | "instapay"
-  | "vodafone"
-  | "etisalat";
+  | "instapay";
+
+type CheckoutStep =
+  | 1
+  | 2;
+
+type CheckoutForm = {
+  name: string;
+  phone: string;
+  email: string;
+  governorate: string;
+  area: string;
+  address: string;
+  notes: string;
+};
 
 const governorates = [
   "Cairo",
@@ -70,7 +78,19 @@ const governorates = [
   "Port Said",
 ];
 
-function formatPrice(value: number) {
+const initialForm: CheckoutForm = {
+  name: "",
+  phone: "",
+  email: "",
+  governorate: "",
+  area: "",
+  address: "",
+  notes: "",
+};
+
+function formatPrice(
+  value: number,
+) {
   return new Intl.NumberFormat(
     "en-EG",
   ).format(value);
@@ -98,13 +118,27 @@ function isValidEgyptPhone(
   );
 }
 
+function getPaymentLabel(
+  value: PaymentMethod,
+) {
+  if (value === "instapay") {
+    return "InstaPay / Bank Transfer";
+  }
+
+  if (value === "card") {
+    return "Debit / Credit Card";
+  }
+
+  return "Cash on Delivery";
+}
+
 export default function CheckoutClient() {
   const router = useRouter();
   const searchParams =
     useSearchParams();
 
-  const formRef =
-    useRef<HTMLFormElement>(null);
+  const topRef =
+    useRef<HTMLDivElement>(null);
 
   const {
     items,
@@ -122,7 +156,9 @@ export default function CheckoutClient() {
 
   const buyNowProduct =
     buyNowSlug
-      ? getProductBySlug(buyNowSlug)
+      ? getProductBySlug(
+          buyNowSlug,
+        )
       : undefined;
 
   const buyNowQuantity =
@@ -140,7 +176,9 @@ export default function CheckoutClient() {
       : 1;
 
   const checkoutItems =
-    useMemo<CheckoutItem[]>(() => {
+    useMemo<
+      CheckoutItem[]
+    >(() => {
       if (buyNowProduct) {
         return [
           {
@@ -162,7 +200,10 @@ export default function CheckoutClient() {
   const subtotal = useMemo(
     () =>
       checkoutItems.reduce(
-        (sum, item) =>
+        (
+          sum,
+          item,
+        ) =>
           sum +
           item.product.price *
             item.quantity,
@@ -184,6 +225,33 @@ export default function CheckoutClient() {
     Math.max(
       0,
       2500 - subtotal,
+    );
+
+  const itemCount =
+    checkoutItems.reduce(
+      (
+        sum,
+        item,
+      ) =>
+        sum +
+        item.quantity,
+      0,
+    );
+
+  const [
+    step,
+    setStep,
+  ] =
+    useState<CheckoutStep>(
+      1,
+    );
+
+  const [
+    form,
+    setForm,
+  ] =
+    useState<CheckoutForm>(
+      initialForm,
     );
 
   const [
@@ -214,148 +282,36 @@ export default function CheckoutClient() {
     setSummaryOpen,
   ] = useState(false);
 
-  const [
-    phoneValue,
-    setPhoneValue,
-  ] = useState("");
-
-  const [
-    codPhoneReady,
-    setCodPhoneReady,
-  ] = useState(false);
-
-  const [
-    governorateValue,
-    setGovernorateValue,
-  ] = useState("");
-
-  const [
-    areaValue,
-    setAreaValue,
-  ] = useState("");
-
-  const [
-    addressValue,
-    setAddressValue,
-  ] = useState("");
-
-  const [
-    addressStatus,
-    setAddressStatus,
-  ] = useState<
-    "idle" | "ready" | "error"
-  >("idle");
-
-  const [
-    savedAddressAvailable,
-    setSavedAddressAvailable,
-  ] = useState(false);
-
-  const [
-    saveAddress,
-    setSaveAddress,
-  ] = useState(true);
-
-  useEffect(() => {
-    try {
-      const raw =
-        window.localStorage.getItem(
-          "vi2-saved-address",
-        );
-
-      setSavedAddressAvailable(
-        Boolean(raw),
-      );
-    } catch {
-      setSavedAddressAvailable(
-        false,
-      );
-    }
-  }, []);
-
-  function fillSavedAddress() {
-    try {
-      const raw =
-        window.localStorage.getItem(
-          "vi2-saved-address",
-        );
-
-      if (!raw) {
-        return;
-      }
-
-      const saved =
-        JSON.parse(raw) as {
-          governorate?: string;
-          area?: string;
-          address?: string;
-        };
-
-      setGovernorateValue(
-        saved.governorate ?? "",
-      );
-
-      setAreaValue(
-        saved.area ?? "",
-      );
-
-      setAddressValue(
-        saved.address ?? "",
-      );
-
-      setAddressStatus(
-        "ready",
-      );
-    } catch {
-      setAddressStatus(
-        "error",
-      );
-    }
-  }
-
-  function checkAddressDetails() {
-    const ready =
-      governorateValue.trim().length >
-        0 &&
-      areaValue.trim().length >= 2 &&
-      addressValue.trim().length >= 8;
-
-    setAddressStatus(
-      ready
-        ? "ready"
-        : "error",
-    );
-  }
-
-  function checkCodPhone() {
-    setPhoneError("");
-
-    if (
-      !isValidEgyptPhone(
-        phoneValue,
-      )
-    ) {
-      setCodPhoneReady(false);
-
-      setPhoneError(
-        "Enter a valid Egyptian mobile number first.",
-      );
-
-      return;
-    }
-
-    setCodPhoneReady(true);
-  }
-
-  function submitFromMobileBar() {
-    formRef.current?.requestSubmit();
-  }
-
-  function handleSubmit(
-    event: FormEvent<HTMLFormElement>,
+  function updateField(
+    key: keyof CheckoutForm,
+    value: string,
   ) {
-    event.preventDefault();
+    setForm(
+      (current) => ({
+        ...current,
+        [key]: value,
+      }),
+    );
 
+    if (key === "phone") {
+      setPhoneError("");
+    }
+
+    setError("");
+  }
+
+  function scrollToTop() {
+    window.scrollTo({
+      top: 0,
+      behavior: "smooth",
+    });
+
+    topRef.current?.focus({
+      preventScroll: true,
+    });
+  }
+
+  function validateDetails() {
     setError("");
     setPhoneError("");
 
@@ -363,158 +319,265 @@ export default function CheckoutClient() {
       checkoutItems.length === 0
     ) {
       setError(
-        "Your order is empty. Add a product before placing the order.",
+        "Your order is empty. Add a product before continuing.",
       );
 
-      return;
+      return false;
     }
 
-    const formData =
-      new FormData(
-        event.currentTarget,
-      );
-
-    const name = String(
-      formData.get("name") ??
-        "",
-    ).trim();
-
-    const phone = String(
-      formData.get("phone") ??
-        "",
-    ).trim();
-
-    const governorate =
-      String(
-        formData.get(
-          "governorate",
-        ) ?? "",
-      ).trim();
-
-    const area = String(
-      formData.get("area") ??
-        "",
-    ).trim();
-
-    const address = String(
-      formData.get("address") ??
-        "",
-    ).trim();
-
     if (
-      !name ||
-      !phone ||
-      !governorate ||
-      !area ||
-      !address
+      !form.name.trim() ||
+      !form.phone.trim() ||
+      !form.governorate.trim() ||
+      !form.area.trim() ||
+      !form.address.trim()
     ) {
       setError(
         "Please complete all required fields.",
       );
 
-      return;
+      return false;
     }
 
     if (
       !isValidEgyptPhone(
-        phone,
+        form.phone,
       )
     ) {
       setPhoneError(
         "Enter a valid Egyptian mobile number, for example 01012345678.",
       );
 
+      return false;
+    }
+
+    return true;
+  }
+
+  function continueToConfirm() {
+    if (
+      !validateDetails()
+    ) {
+      return;
+    }
+
+    setStep(2);
+    scrollToTop();
+  }
+
+  function returnToDetails() {
+    setStep(1);
+    setError("");
+    scrollToTop();
+  }
+
+  async function placeOrder() {
+    if (
+      !validateDetails()
+    ) {
+      setStep(1);
+      scrollToTop();
       return;
     }
 
     setSubmitting(true);
+    setError("");
 
-    const reference =
-      `VI2${Date.now()
-        .toString()
-        .slice(-7)}`;
-
-    const order = {
-      reference,
-      createdAt:
-        new Date().toISOString(),
+    const orderPayload = {
       customer: {
-        name,
+        name:
+          form.name.trim(),
+
         phone:
           normalizeEgyptPhone(
-            phone,
+            form.phone,
           ),
-        email: String(
-          formData.get(
-            "email",
-          ) ?? "",
-        ).trim(),
-        governorate,
-        area,
-        address,
-        notes: String(
-          formData.get(
-            "notes",
-          ) ?? "",
-        ).trim(),
+
+        email:
+          form.email.trim(),
+
+        governorate:
+          form.governorate,
+
+        area:
+          form.area.trim(),
+
+        address:
+          form.address.trim(),
+
+        notes:
+          form.notes.trim(),
       },
+
       paymentMethod,
+
       subtotal,
       delivery,
       total,
+
       items:
         checkoutItems.map(
-          (item) => ({
+          (
+            item,
+          ) => ({
             id:
               item.product.id,
+
             slug:
               item.product.slug,
+
             name:
               item.product.name,
+
+            brand:
+              item.product.brand,
+
+            image:
+              item.product.image,
+
             price:
               item.product.price,
+
             quantity:
               item.quantity,
           }),
         ),
     };
 
-    window.localStorage.setItem(
-      "vi2-last-order",
-      JSON.stringify(order),
-    );
+    try {
+      const response =
+        await fetch(
+          "/api/orders",
+          {
+            method:
+              "POST",
 
-    if (saveAddress) {
+            headers: {
+              "Content-Type":
+                "application/json",
+            },
+
+            body:
+              JSON.stringify(
+                orderPayload,
+              ),
+          },
+        );
+
+      const responseText =
+        await response.text();
+
+      let result: {
+        error?: string;
+
+        order?: {
+          reference: string;
+          status: string;
+          paymentStatus: string;
+          createdAt: string;
+        };
+      } = {};
+
       try {
-        window.localStorage.setItem(
-          "vi2-saved-address",
-          JSON.stringify({
-            governorate,
-            area,
-            address,
-          }),
-        );
-
-        setSavedAddressAvailable(
-          true,
-        );
+        result =
+          responseText
+            ? JSON.parse(
+                responseText,
+              )
+            : {};
       } catch {
-        // Checkout should not fail if local storage is unavailable.
+        console.error(
+          "VI2 /api/orders returned a non-JSON response:",
+          responseText.slice(
+            0,
+            300,
+          ),
+        );
+
+        throw new Error(
+          "The order service is temporarily unavailable. Please try again.",
+        );
       }
-    }
 
-    if (!buyNowProduct) {
-      clearCart();
-    }
+      if (
+        !response.ok ||
+        !result.order
+      ) {
+        throw new Error(
+          result.error ||
+            "Could not place your order. Please try again.",
+        );
+      }
 
-    router.push(
-      `/order/success?order=${reference}`,
-    );
+      window.localStorage.setItem(
+        "vi2-last-order",
+        JSON.stringify({
+          ...orderPayload,
+
+          reference:
+            result.order.reference,
+
+          createdAt:
+            result.order.createdAt,
+
+          orderStatus:
+            result.order.status,
+
+          paymentStatus:
+            result.order.paymentStatus,
+        }),
+      );
+
+      if (!buyNowProduct) {
+        clearCart();
+      }
+
+      router.push(
+        `/order/success?order=${encodeURIComponent(
+          result.order.reference,
+        )}`,
+      );
+    } catch (
+      submitError
+    ) {
+      console.error(
+        "VI2 checkout submit error:",
+        submitError,
+      );
+
+      setError(
+        submitError instanceof Error
+          ? submitError.message
+          : "Could not place your order. Please try again.",
+      );
+
+      setSubmitting(false);
+    }
   }
+
+  const backHref =
+    buyNowProduct
+      ? `/products/${buyNowProduct.slug}`
+      : "/shop";
 
   return (
     <>
-      <main className={styles.page}>
+      <main
+        className={
+          styles.page
+        }
+      >
+        <div
+          ref={topRef}
+          tabIndex={-1}
+          className={
+            styles.topAnchor
+          }
+        />
+
+        {/* ===================================================
+            CHECKOUT HEADER / PROGRESS
+            =================================================== */}
         <header
           className={
             styles.checkoutHeader
@@ -522,74 +585,130 @@ export default function CheckoutClient() {
         >
           <Link
             href={
-              buyNowProduct
-                ? `/products/${buyNowProduct.slug}`
-                : "/shop"
+              step === 1
+                ? backHref
+                : "#"
+            }
+            onClick={
+              step === 2
+                ? (
+                    event,
+                  ) => {
+                    event.preventDefault();
+                    returnToDetails();
+                  }
+                : undefined
+            }
+            className={
+              styles.backLink
             }
           >
             <ArrowLeft
               size={15}
-              strokeWidth={1.6}
+              strokeWidth={
+                1.5
+              }
             />
 
-            BACK
+            {step === 1
+              ? "BACK"
+              : "DETAILS"}
           </Link>
 
-          <div>
-            <ShieldCheck
-              size={15}
-              strokeWidth={1.4}
-            />
+          <div
+            className={
+              styles.checkoutBrand
+            }
+          >
+            <strong>
+              VI2
+            </strong>
 
             <span>
               SECURE CHECKOUT
             </span>
+          </div>
 
-            <strong>
-              VI2
-            </strong>
+          <div
+            className={
+              styles.progress
+            }
+            aria-label="Checkout progress"
+          >
+            <div
+              className={
+                step === 1
+                  ? styles.progressActive
+                  : styles.progressDone
+              }
+            >
+              <span>
+                01
+              </span>
+              <strong>
+                DETAILS
+              </strong>
+            </div>
+
+            <i />
+
+            <div
+              className={
+                step === 2
+                  ? styles.progressActive
+                  : ""
+              }
+            >
+              <span>
+                02
+              </span>
+              <strong>
+                CONFIRM
+              </strong>
+            </div>
+
+            <i />
+
+            <div>
+              <span>
+                03
+              </span>
+              <strong>
+                COMPLETE
+              </strong>
+            </div>
           </div>
         </header>
 
+        {/* ===================================================
+            MOBILE ORDER SUMMARY
+            =================================================== */}
         <div
           className={
-            styles.mobileSummaryBar
+            styles.mobileSummary
           }
         >
           <button
             type="button"
             onClick={() =>
               setSummaryOpen(
-                (current) =>
+                (
+                  current,
+                ) =>
                   !current,
               )
             }
           >
             <div>
               <span>
-                YOUR ORDER
+                ORDER SUMMARY
               </span>
 
               <strong>
-                {checkoutItems.reduce(
-                  (
-                    count,
-                    item,
-                  ) =>
-                    count +
-                    item.quantity,
-                  0,
-                )}{" "}
+                {itemCount}{" "}
                 ITEM
-                {checkoutItems.reduce(
-                  (
-                    count,
-                    item,
-                  ) =>
-                    count +
-                    item.quantity,
-                  0,
-                ) === 1
+                {itemCount ===
+                1
                   ? ""
                   : "S"}
               </strong>
@@ -617,52 +736,59 @@ export default function CheckoutClient() {
           {summaryOpen && (
             <div
               className={
-                styles.mobileSummaryDrop
+                styles.mobileSummaryBody
               }
             >
               {checkoutItems.map(
-                (item) => (
+                (
+                  item,
+                ) => (
                   <div
                     key={
                       item.product.id
                     }
                     className={
-                      styles.mobileSummaryItem
+                      styles.mobileOrderItem
                     }
                   >
-                    <img
-                      src={
-                        item.product
-                          .image
+                    <div
+                      className={
+                        styles.mobileImage
                       }
-                      alt={
-                        item.product
-                          .name
-                      }
-                    />
+                    >
+                      <img
+                        src={
+                          item.product.image
+                        }
+                        alt={
+                          item.product.name
+                        }
+                      />
+
+                      <span>
+                        {
+                          item.quantity
+                        }
+                      </span>
+                    </div>
 
                     <div>
                       <span>
                         {
-                          item.product
-                            .brand
+                          item.product.brand
                         }
                       </span>
 
                       <strong>
                         {
-                          item.product
-                            .shortName
+                          item.product.shortName
                         }
                       </strong>
 
                       <small>
-                        {item.quantity}
-                        ×{" "}
                         {formatPrice(
-                          item
-                            .product
-                            .price,
+                          item.product.price *
+                            item.quantity,
                         )}{" "}
                         EGP
                       </small>
@@ -673,12 +799,12 @@ export default function CheckoutClient() {
 
               <div
                 className={
-                  styles.mobileSummaryTotals
+                  styles.mobileTotals
                 }
               >
                 <div>
                   <span>
-                    Delivery
+                    DELIVERY
                   </span>
 
                   <strong>
@@ -693,7 +819,7 @@ export default function CheckoutClient() {
 
                 <div>
                   <span>
-                    Total
+                    TOTAL
                   </span>
 
                   <strong>
@@ -708,699 +834,396 @@ export default function CheckoutClient() {
           )}
         </div>
 
-        <form
-          ref={formRef}
+        <div
           className={
             styles.layout
           }
-          onSubmit={
-            handleSubmit
-          }
         >
+          {/* =================================================
+              LEFT / MAIN
+              ================================================= */}
           <div
             className={
-              styles.formColumn
+              styles.mainColumn
             }
           >
-            <section
-              className={
-                styles.checkoutIntro
-              }
-            >
-              <div>
-                <span>
-                  CHECKOUT
-                </span>
-
-                <h1>
-                  FAST.
-                  <br />
-                  SIMPLE.
-                </h1>
-              </div>
-
-              <p>
-                Enter the essentials,
-                choose how you want to
-                pay, and you&apos;re done.
-              </p>
-            </section>
-
-            <section
-              className={
-                styles.section
-              }
-            >
-              <div
-                className={
-                  styles.sectionNumber
-                }
-              >
-                01
-              </div>
-
-              <div
-                className={
-                  styles.sectionBody
-                }
-              >
-                <div
+            {step === 1 ? (
+              <>
+                <section
                   className={
-                    styles.sectionHeading
+                    styles.intro
                   }
                 >
-                  <h2>
-                    CONTACT
-                  </h2>
+                  <div>
+                    <span>
+                      CHECKOUT
+                    </span>
 
-                  <span>
-                    WHO ARE WE
-                    DELIVERING TO?
-                  </span>
-                </div>
+                    <h1>
+                      FAST.
+                      <br />
+                      SIMPLE.
+                    </h1>
+                  </div>
 
-                <div
+                  <p>
+                    Add your
+                    delivery details,
+                    review your
+                    order, and place
+                    it in the next
+                    step.
+                  </p>
+                </section>
+
+                {/* CONTACT */}
+                <section
                   className={
-                    styles.fields
-                  }
-                >
-                  <label
-                    className={
-                      styles.fullField
-                    }
-                  >
-                    <span>
-                      FULL NAME *
-                    </span>
-
-                    <input
-                      name="name"
-                      type="text"
-                      autoComplete="name"
-                      placeholder="Your name"
-                    />
-                  </label>
-
-                  <label>
-                    <span>
-                      PHONE *
-                    </span>
-
-                    <input
-                      name="phone"
-                      type="tel"
-                      inputMode="tel"
-                      autoComplete="tel"
-                      placeholder="01012345678"
-                      value={phoneValue}
-                      onChange={(event) => {
-                        setPhoneValue(
-                          event.target.value,
-                        );
-
-                        setPhoneError("");
-                        setCodPhoneReady(
-                          false,
-                        );
-                      }}
-                    />
-
-                    {phoneError && (
-                      <small
-                        className={
-                          styles.fieldError
-                        }
-                      >
-                        {phoneError}
-                      </small>
-                    )}
-                  </label>
-
-                  <label>
-                    <span>
-                      EMAIL
-                    </span>
-
-                    <input
-                      name="email"
-                      type="email"
-                      autoComplete="email"
-                      placeholder="you@email.com"
-                    />
-                  </label>
-                </div>
-              </div>
-            </section>
-
-            <section
-              className={
-                styles.section
-              }
-            >
-              <div
-                className={
-                  styles.sectionNumber
-                }
-              >
-                02
-              </div>
-
-              <div
-                className={
-                  styles.sectionBody
-                }
-              >
-                <div
-                  className={
-                    styles.sectionHeading
-                  }
-                >
-                  <h2>
-                    DELIVERY
-                  </h2>
-
-                  <span>
-                    WHERE SHOULD
-                    IT GO?
-                  </span>
-                </div>
-
-                <div
-                  className={
-                    styles.fields
-                  }
-                >
-                  <label>
-                    <span>
-                      GOVERNORATE *
-                    </span>
-
-                    <select
-                      name="governorate"
-                      value={governorateValue}
-                      onChange={(event) => {
-                        setGovernorateValue(
-                          event.target.value,
-                        );
-
-                        setAddressStatus(
-                          "idle",
-                        );
-                      }}
-                    >
-                      <option
-                        value=""
-                        disabled
-                      >
-                        Select
-                      </option>
-
-                      {governorates.map(
-                        (
-                          governorate,
-                        ) => (
-                          <option
-                            key={
-                              governorate
-                            }
-                            value={
-                              governorate
-                            }
-                          >
-                            {
-                              governorate
-                            }
-                          </option>
-                        ),
-                      )}
-                    </select>
-                  </label>
-
-                  <label>
-                    <span>
-                      AREA *
-                    </span>
-
-                    <input
-                      name="area"
-                      type="text"
-                      autoComplete="address-level2"
-                      placeholder="Area / district"
-                      value={areaValue}
-                      onChange={(event) => {
-                        setAreaValue(
-                          event.target.value,
-                        );
-
-                        setAddressStatus(
-                          "idle",
-                        );
-                      }}
-                    />
-                  </label>
-
-                  <label
-                    className={
-                      styles.fullField
-                    }
-                  >
-                    <span>
-                      ADDRESS *
-                    </span>
-
-                    <input
-                      name="address"
-                      type="text"
-                      autoComplete="street-address"
-                      placeholder="Building, street, floor and apartment"
-                      value={addressValue}
-                      onChange={(event) => {
-                        setAddressValue(
-                          event.target.value,
-                        );
-
-                        setAddressStatus(
-                          "idle",
-                        );
-                      }}
-                    />
-                  </label>
-
-                  <label
-                    className={
-                      styles.fullField
-                    }
-                  >
-                    <span>
-                      DELIVERY NOTES
-                    </span>
-
-                    <input
-                      name="notes"
-                      type="text"
-                      placeholder="Optional instructions"
-                    />
-                  </label>
-                </div>
-
-                <div
-                  className={
-                    styles.addressTools
+                    styles.formCard
                   }
                 >
                   <div
                     className={
-                      styles.addressActions
+                      styles.cardHeader
                     }
                   >
-                    <button
-                      type="button"
-                      disabled={
-                        !savedAddressAvailable
-                      }
-                      onClick={
-                        fillSavedAddress
-                      }
-                    >
-                      USE SAVED ADDRESS
-                    </button>
+                    <div>
+                      <span>
+                        STEP 01
+                      </span>
 
-                    <button
-                      type="button"
-                      onClick={
-                        checkAddressDetails
-                      }
-                    >
-                      CHECK ADDRESS
-                    </button>
+                      <h2>
+                        CONTACT
+                        INFORMATION
+                      </h2>
+                    </div>
+
+                    <small>
+                      WHO ARE WE
+                      DELIVERING TO?
+                    </small>
                   </div>
 
-                  <label
+                  <div
                     className={
-                      styles.saveAddress
+                      styles.fields
                     }
                   >
-                    <input
-                      type="checkbox"
-                      checked={
-                        saveAddress
-                      }
-                      onChange={(event) =>
-                        setSaveAddress(
-                          event.target
-                            .checked,
-                        )
-                      }
-                    />
-
-                    <span>
-                      SAVE THIS ADDRESS ON
-                      THIS DEVICE
-                    </span>
-                  </label>
-
-                  {addressStatus !==
-                    "idle" && (
-                    <div
+                    <label
                       className={
-                        addressStatus ===
-                        "ready"
-                          ? styles.addressReady
-                          : styles.addressError
+                        styles.fullField
                       }
                     >
-                      {addressStatus ===
-                      "ready"
-                        ? "ADDRESS DETAILS READY"
-                        : "COMPLETE GOVERNORATE, AREA AND FULL ADDRESS"}
+                      <span>
+                        FULL NAME *
+                      </span>
+
+                      <input
+                        type="text"
+                        autoComplete="name"
+                        value={
+                          form.name
+                        }
+                        placeholder="Your full name"
+                        onChange={(
+                          event,
+                        ) =>
+                          updateField(
+                            "name",
+                            event
+                              .target
+                              .value,
+                          )
+                        }
+                      />
+                    </label>
+
+                    <label>
+                      <span>
+                        PHONE NUMBER *
+                      </span>
+
+                      <input
+                        type="tel"
+                        inputMode="tel"
+                        autoComplete="tel"
+                        value={
+                          form.phone
+                        }
+                        placeholder="01012345678"
+                        onChange={(
+                          event,
+                        ) =>
+                          updateField(
+                            "phone",
+                            event
+                              .target
+                              .value,
+                          )
+                        }
+                      />
+
+                      {phoneError && (
+                        <small
+                          className={
+                            styles.fieldError
+                          }
+                        >
+                          {
+                            phoneError
+                          }
+                        </small>
+                      )}
+                    </label>
+
+                    <label>
+                      <span>
+                        EMAIL
+                      </span>
+
+                      <input
+                        type="email"
+                        autoComplete="email"
+                        value={
+                          form.email
+                        }
+                        placeholder="you@email.com"
+                        onChange={(
+                          event,
+                        ) =>
+                          updateField(
+                            "email",
+                            event
+                              .target
+                              .value,
+                          )
+                        }
+                      />
+                    </label>
+                  </div>
+                </section>
+
+                {/* DELIVERY */}
+                <section
+                  className={
+                    styles.formCard
+                  }
+                >
+                  <div
+                    className={
+                      styles.cardHeader
+                    }
+                  >
+                    <div>
+                      <span>
+                        STEP 02
+                      </span>
+
+                      <h2>
+                        DELIVERY
+                        ADDRESS
+                      </h2>
                     </div>
-                  )}
+
+                    <small>
+                      WHERE SHOULD
+                      IT GO?
+                    </small>
+                  </div>
 
                   <div
                     className={
-                      styles.localMarketNotice
+                      styles.fields
                     }
                   >
-                    <ShieldCheck
-                      size={14}
-                      strokeWidth={1.4}
-                    />
-
-                    <span>
-                      All customer prices are
-                      shown in EGP. Vi2 handles
-                      supplier/import costs before
-                      checkout, so there are no
-                      surprise international duties
-                      added to this order.
-                    </span>
-                  </div>
-                </div>
-              </div>
-            </section>
-
-            <section
-              className={
-                styles.section
-              }
-            >
-              <div
-                className={
-                  styles.sectionNumber
-                }
-              >
-                03
-              </div>
-
-              <div
-                className={
-                  styles.sectionBody
-                }
-              >
-                <div
-                  className={
-                    styles.sectionHeading
-                  }
-                >
-                  <h2>
-                    PAYMENT
-                  </h2>
-
-                  <span>
-                    CHOOSE ONE
-                  </span>
-                </div>
-
-                <div
-                  className={
-                    styles.paymentOptions
-                  }
-                >
-                  <label
-                    className={
-                      paymentMethod ===
-                      "cod"
-                        ? styles.paymentSelected
-                        : ""
-                    }
-                  >
-                    <input
-                      type="radio"
-                      name="payment"
-                      value="cod"
-                      checked={
-                        paymentMethod ===
-                        "cod"
-                      }
-                      onChange={() =>
-                        setPaymentMethod(
-                          "cod",
-                        )
-                      }
-                    />
-
-                    <WalletCards
-                      size={19}
-                      strokeWidth={1.45}
-                    />
-
-                    <div>
-                      <strong>
-                        CASH
-                      </strong>
-
+                    <label>
                       <span>
-                        Pay on
-                        delivery
-                      </span>
-                    </div>
-
-                    {paymentMethod ===
-                      "cod" && (
-                      <Check
-                        size={16}
-                      />
-                    )}
-                  </label>
-
-                  <label
-                    className={
-                      paymentMethod ===
-                      "card"
-                        ? styles.paymentSelected
-                        : ""
-                    }
-                  >
-                    <input
-                      type="radio"
-                      name="payment"
-                      value="card"
-                      checked={
-                        paymentMethod ===
-                        "card"
-                      }
-                      onChange={() =>
-                        setPaymentMethod(
-                          "card",
-                        )
-                      }
-                    />
-
-                    <CreditCard
-                      size={19}
-                      strokeWidth={1.45}
-                    />
-
-                    <div>
-                      <strong>
-                        CARD
-                      </strong>
-
-                      <span>
-                        Visa / Mastercard / Meeza
-                      </span>
-                    </div>
-
-                    {paymentMethod ===
-                      "card" && (
-                      <Check
-                        size={16}
-                      />
-                    )}
-                  </label>
-
-                  <label
-                    className={
-                      paymentMethod ===
-                      "instapay"
-                        ? styles.paymentSelected
-                        : ""
-                    }
-                  >
-                    <input
-                      type="radio"
-                      name="payment"
-                      value="instapay"
-                      checked={
-                        paymentMethod ===
-                        "instapay"
-                      }
-                      onChange={() =>
-                        setPaymentMethod(
-                          "instapay",
-                        )
-                      }
-                    />
-
-                    <Landmark
-                      size={19}
-                      strokeWidth={1.45}
-                    />
-
-                    <div>
-                      <strong>
-                        INSTAPAY
-                      </strong>
-
-                      <span>
-                        Bank
-                        transfer
-                      </span>
-                    </div>
-
-                    {paymentMethod ===
-                      "instapay" && (
-                      <Check
-                        size={16}
-                      />
-                    )}
-                  </label>
-
-                  <label
-                    className={
-                      paymentMethod ===
-                      "vodafone"
-                        ? styles.paymentSelected
-                        : ""
-                    }
-                  >
-                    <input
-                      type="radio"
-                      name="payment"
-                      value="vodafone"
-                      checked={
-                        paymentMethod ===
-                        "vodafone"
-                      }
-                      onChange={() =>
-                        setPaymentMethod(
-                          "vodafone",
-                        )
-                      }
-                    />
-
-                    <Smartphone
-                      size={19}
-                      strokeWidth={1.45}
-                    />
-
-                    <div>
-                      <strong>
-                        MOBILE WALLET
-                      </strong>
-
-                      <span>
-                        Vodafone Cash
-                      </span>
-                    </div>
-
-                    {paymentMethod ===
-                      "vodafone" && (
-                      <Check
-                        size={16}
-                      />
-                    )}
-                  </label>
-
-                  <label
-                    className={
-                      paymentMethod ===
-                      "etisalat"
-                        ? styles.paymentSelected
-                        : ""
-                    }
-                  >
-                    <input
-                      type="radio"
-                      name="payment"
-                      value="etisalat"
-                      checked={
-                        paymentMethod ===
-                        "etisalat"
-                      }
-                      onChange={() =>
-                        setPaymentMethod(
-                          "etisalat",
-                        )
-                      }
-                    />
-
-                    <Smartphone
-                      size={19}
-                      strokeWidth={1.45}
-                    />
-
-                    <div>
-                      <strong>
-                        MOBILE WALLET
-                      </strong>
-
-                      <span>
-                        Etisalat Cash
-                      </span>
-                    </div>
-
-                    {paymentMethod ===
-                      "etisalat" && (
-                      <Check
-                        size={16}
-                      />
-                    )}
-                  </label>
-                </div>
-
-                {paymentMethod === "cod" && (
-                  <div className={styles.codNotice}>
-                    <ShieldCheck
-                      size={15}
-                      strokeWidth={1.45}
-                    />
-
-                    <div>
-                      <strong>
-                        COD MOBILE VERIFICATION
-                      </strong>
-
-                      <span>
-                        SMS / WhatsApp OTP can use
-                        the mobile number entered
-                        above before final COD
-                        confirmation.
+                        GOVERNORATE *
                       </span>
 
-                      <button
-                        type="button"
-                        onClick={
-                          checkCodPhone
+                      <select
+                        value={
+                          form.governorate
+                        }
+                        onChange={(
+                          event,
+                        ) =>
+                          updateField(
+                            "governorate",
+                            event
+                              .target
+                              .value,
+                          )
                         }
                       >
-                        {codPhoneReady
-                          ? "NUMBER READY"
-                          : "CHECK MOBILE NUMBER"}
-                      </button>
-                    </div>
+                        <option
+                          value=""
+                          disabled
+                        >
+                          Select
+                          Governorate
+                        </option>
+
+                        {governorates.map(
+                          (
+                            governorate,
+                          ) => (
+                            <option
+                              key={
+                                governorate
+                              }
+                              value={
+                                governorate
+                              }
+                            >
+                              {
+                                governorate
+                              }
+                            </option>
+                          ),
+                        )}
+                      </select>
+                    </label>
+
+                    <label>
+                      <span>
+                        AREA / DISTRICT *
+                      </span>
+
+                      <input
+                        type="text"
+                        autoComplete="address-level2"
+                        value={
+                          form.area
+                        }
+                        placeholder="Area / district"
+                        onChange={(
+                          event,
+                        ) =>
+                          updateField(
+                            "area",
+                            event
+                              .target
+                              .value,
+                          )
+                        }
+                      />
+                    </label>
+
+                    <label
+                      className={
+                        styles.fullField
+                      }
+                    >
+                      <span>
+                        DETAILED ADDRESS *
+                      </span>
+
+                      <input
+                        type="text"
+                        autoComplete="street-address"
+                        value={
+                          form.address
+                        }
+                        placeholder="Building, street, floor and apartment"
+                        onChange={(
+                          event,
+                        ) =>
+                          updateField(
+                            "address",
+                            event
+                              .target
+                              .value,
+                          )
+                        }
+                      />
+                    </label>
+
+                    <label
+                      className={
+                        styles.fullField
+                      }
+                    >
+                      <span>
+                        DELIVERY NOTES
+                      </span>
+
+                      <input
+                        type="text"
+                        value={
+                          form.notes
+                        }
+                        placeholder="Optional delivery instructions"
+                        onChange={(
+                          event,
+                        ) =>
+                          updateField(
+                            "notes",
+                            event
+                              .target
+                              .value,
+                          )
+                        }
+                      />
+                    </label>
                   </div>
-                )}
+                </section>
+
+                {/* DELIVERY METHOD — intentionally simple */}
+                <section
+                  className={`${styles.formCard} ${styles.deliveryCard}`}
+                >
+                  <div
+                    className={
+                      styles.cardHeader
+                    }
+                  >
+                    <div>
+                      <span>
+                        DELIVERY
+                      </span>
+
+                      <h2>
+                        STANDARD
+                        DELIVERY
+                      </h2>
+                    </div>
+
+                    <Truck
+                      size={22}
+                      strokeWidth={
+                        1.4
+                      }
+                    />
+                  </div>
+
+                  <div
+                    className={
+                      styles.deliveryMethod
+                    }
+                  >
+                    <div>
+                      <strong>
+                        Standard
+                        Delivery
+                      </strong>
+
+                      <span>
+                        Delivery
+                        across Egypt
+                      </span>
+                    </div>
+
+                    <strong>
+                      {delivery ===
+                      0
+                        ? "FREE"
+                        : `${formatPrice(
+                            delivery,
+                          )} EGP`}
+                    </strong>
+                  </div>
+                </section>
 
                 {error && (
                   <p
@@ -1413,12 +1236,381 @@ export default function CheckoutClient() {
                 )}
 
                 <button
-                  type="submit"
+                  type="button"
                   className={
-                    styles.placeOrderButton
+                    styles.primaryButton
+                  }
+                  onClick={
+                    continueToConfirm
+                  }
+                >
+                  CONTINUE TO
+                  CONFIRMATION
+                  <ArrowRight
+                    size={16}
+                    strokeWidth={
+                      1.5
+                    }
+                  />
+                </button>
+              </>
+            ) : (
+              <>
+                <section
+                  className={
+                    styles.confirmIntro
+                  }
+                >
+                  <div
+                    className={
+                      styles.confirmKicker
+                    }
+                  >
+                    <span>
+                      STEP 02
+                    </span>
+
+                    <i />
+
+                    <span>
+                      REVIEW & PLACE
+                      ORDER
+                    </span>
+                  </div>
+
+                  <h1>
+                    CONFIRM
+                    YOUR ORDER
+                  </h1>
+
+                  <p>
+                    Check the details
+                    below, choose your
+                    payment method,
+                    then place your
+                    order.
+                  </p>
+                </section>
+
+                {/* PAYMENT */}
+                <section
+                  className={
+                    styles.confirmSection
+                  }
+                >
+                  <div
+                    className={
+                      styles.confirmSectionHeader
+                    }
+                  >
+                    <h2>
+                      PAYMENT
+                      METHOD
+                    </h2>
+
+                    <span>
+                      CHOOSE ONE
+                    </span>
+                  </div>
+
+                  <div
+                    className={
+                      styles.paymentGrid
+                    }
+                  >
+                    <button
+                      type="button"
+                      className={
+                        paymentMethod ===
+                        "cod"
+                          ? styles.paymentSelected
+                          : styles.paymentOption
+                      }
+                      onClick={() =>
+                        setPaymentMethod(
+                          "cod",
+                        )
+                      }
+                    >
+                      <WalletCards
+                        size={21}
+                        strokeWidth={
+                          1.4
+                        }
+                      />
+
+                      <div>
+                        <strong>
+                          CASH ON
+                          DELIVERY
+                        </strong>
+
+                        <span>
+                          Pay when
+                          your order
+                          arrives
+                        </span>
+                      </div>
+
+                      {paymentMethod ===
+                        "cod" && (
+                        <Check
+                          size={16}
+                        />
+                      )}
+                    </button>
+
+                    <button
+                      type="button"
+                      className={
+                        paymentMethod ===
+                        "instapay"
+                          ? styles.paymentSelected
+                          : styles.paymentOption
+                      }
+                      onClick={() =>
+                        setPaymentMethod(
+                          "instapay",
+                        )
+                      }
+                    >
+                      <Landmark
+                        size={21}
+                        strokeWidth={
+                          1.4
+                        }
+                      />
+
+                      <div>
+                        <strong>
+                          INSTAPAY /
+                          BANK
+                        </strong>
+
+                        <span>
+                          Transfer
+                          after
+                          checkout
+                        </span>
+                      </div>
+
+                      {paymentMethod ===
+                        "instapay" && (
+                        <Check
+                          size={16}
+                        />
+                      )}
+                    </button>
+
+                    <button
+                      type="button"
+                      className={
+                        paymentMethod ===
+                        "card"
+                          ? styles.paymentSelected
+                          : styles.paymentOption
+                      }
+                      onClick={() =>
+                        setPaymentMethod(
+                          "card",
+                        )
+                      }
+                    >
+                      <CreditCard
+                        size={21}
+                        strokeWidth={
+                          1.4
+                        }
+                      />
+
+                      <div>
+                        <strong>
+                          DEBIT /
+                          CREDIT CARD
+                        </strong>
+
+                        <span>
+                          Card
+                          payment
+                        </span>
+                      </div>
+
+                      {paymentMethod ===
+                        "card" && (
+                        <Check
+                          size={16}
+                        />
+                      )}
+                    </button>
+                  </div>
+
+                  {(paymentMethod ===
+                    "card" ||
+                    paymentMethod ===
+                      "instapay") && (
+                    <div
+                      className={
+                        styles.paymentNotice
+                      }
+                    >
+                      <ShieldCheck
+                        size={16}
+                        strokeWidth={
+                          1.4
+                        }
+                      />
+
+                      <span>
+                        This order
+                        will be
+                        created with
+                        payment
+                        status
+                        pending until
+                        the payment
+                        flow is
+                        connected.
+                      </span>
+                    </div>
+                  )}
+                </section>
+
+                {/* REVIEW */}
+                <section
+                  className={
+                    styles.confirmSection
+                  }
+                >
+                  <div
+                    className={
+                      styles.confirmSectionHeader
+                    }
+                  >
+                    <h2>
+                      ORDER REVIEW
+                    </h2>
+
+                    <span>
+                      VERIFY DETAILS
+                    </span>
+                  </div>
+
+                  <div
+                    className={
+                      styles.reviewGrid
+                    }
+                  >
+                    <div
+                      className={
+                        styles.reviewCard
+                      }
+                    >
+                      <span>
+                        DELIVERY
+                        ADDRESS
+                      </span>
+
+                      <strong>
+                        {
+                          form.name
+                        }
+                      </strong>
+
+                      <p>
+                        {
+                          form.address
+                        }
+                        <br />
+                        {
+                          form.area
+                        }
+                        ,{" "}
+                        {
+                          form.governorate
+                        }
+                      </p>
+
+                      <button
+                        type="button"
+                        onClick={
+                          returnToDetails
+                        }
+                      >
+                        EDIT
+                      </button>
+                    </div>
+
+                    <div
+                      className={
+                        styles.reviewCard
+                      }
+                    >
+                      <span>
+                        DELIVERY
+                      </span>
+
+                      <strong>
+                        Standard
+                        Delivery
+                      </strong>
+
+                      <p>
+                        {delivery ===
+                        0
+                          ? "Free delivery"
+                          : `${formatPrice(
+                              delivery,
+                            )} EGP`}
+                        <br />
+                        Across Egypt
+                      </p>
+                    </div>
+
+                    <div
+                      className={
+                        styles.reviewCard
+                      }
+                    >
+                      <span>
+                        PAYMENT
+                      </span>
+
+                      <strong>
+                        {getPaymentLabel(
+                          paymentMethod,
+                        )}
+                      </strong>
+
+                      <p>
+                        {paymentMethod ===
+                        "cod"
+                          ? "Pay on arrival"
+                          : "Payment pending"}
+                      </p>
+                    </div>
+                  </div>
+                </section>
+
+                {error && (
+                  <p
+                    className={
+                      styles.error
+                    }
+                  >
+                    {error}
+                  </p>
+                )}
+
+                <button
+                  type="button"
+                  className={
+                    styles.primaryButton
                   }
                   disabled={
                     submitting
+                  }
+                  onClick={
+                    placeOrder
                   }
                 >
                   {submitting
@@ -1426,27 +1618,42 @@ export default function CheckoutClient() {
                     : `PLACE ORDER · ${formatPrice(
                         total,
                       )} EGP`}
+
+                  {!submitting && (
+                    <ArrowRight
+                      size={16}
+                      strokeWidth={
+                        1.5
+                      }
+                    />
+                  )}
                 </button>
 
                 <div
                   className={
-                    styles.secureNote
+                    styles.secureFooter
                   }
                 >
-                  <CheckCircle2
+                  <ShieldCheck
                     size={15}
-                    strokeWidth={1.5}
+                    strokeWidth={
+                      1.4
+                    }
                   />
 
                   <span>
+                    Secure checkout.
                     No account
                     required.
                   </span>
                 </div>
-              </div>
-            </section>
+              </>
+            )}
           </div>
 
+          {/* =================================================
+              DESKTOP ORDER SUMMARY
+              ================================================= */}
           <aside
             className={
               styles.summary
@@ -1462,7 +1669,7 @@ export default function CheckoutClient() {
                   styles.summaryEyebrow
                 }
               >
-                YOUR ORDER
+                ORDER SUMMARY
               </span>
 
               <h2>
@@ -1484,13 +1691,15 @@ export default function CheckoutClient() {
                     }
                   >
                     <PackageCheck
-                      size={27}
-                      strokeWidth={1.3}
+                      size={26}
+                      strokeWidth={
+                        1.3
+                      }
                     />
 
                     <p>
-                      No products in
-                      your order.
+                      Your order is
+                      empty.
                     </p>
 
                     <Link href="/shop">
@@ -1499,12 +1708,12 @@ export default function CheckoutClient() {
                   </div>
                 ) : (
                   checkoutItems.map(
-                    (item) => (
+                    (
+                      item,
+                    ) => (
                       <article
                         key={
-                          item
-                            .product
-                            .id
+                          item.product.id
                         }
                         className={
                           styles.orderItem
@@ -1517,14 +1726,10 @@ export default function CheckoutClient() {
                         >
                           <img
                             src={
-                              item
-                                .product
-                                .image
+                              item.product.image
                             }
                             alt={
-                              item
-                                .product
-                                .name
+                              item.product.name
                             }
                           />
 
@@ -1542,25 +1747,19 @@ export default function CheckoutClient() {
                         >
                           <span>
                             {
-                              item
-                                .product
-                                .brand
+                              item.product.brand
                             }
                           </span>
 
                           <strong>
                             {
-                              item
-                                .product
-                                .shortName
+                              item.product.shortName
                             }
                           </strong>
 
                           <small>
                             {
-                              item
-                                .product
-                                .size
+                              item.product.size
                             }
                           </small>
                         </div>
@@ -1571,9 +1770,7 @@ export default function CheckoutClient() {
                           }
                         >
                           {formatPrice(
-                            item
-                              .product
-                              .price *
+                            item.product.price *
                               item.quantity,
                           )}{" "}
                           EGP
@@ -1583,6 +1780,47 @@ export default function CheckoutClient() {
                   )
                 )}
               </div>
+
+              {subtotal >
+                0 &&
+                subtotal <
+                  2500 && (
+                  <div
+                    className={
+                      styles.freeDelivery
+                    }
+                  >
+                    <div>
+                      <span>
+                        FREE DELIVERY
+                      </span>
+
+                      <strong>
+                        {formatPrice(
+                          amountUntilFreeDelivery,
+                        )}{" "}
+                        EGP TO GO
+                      </strong>
+                    </div>
+
+                    <div
+                      className={
+                        styles.progressTrack
+                      }
+                    >
+                      <span
+                        style={{
+                          width: `${Math.min(
+                            100,
+                            (subtotal /
+                              2500) *
+                              100,
+                          )}%`,
+                        }}
+                      />
+                    </div>
+                  </div>
+                )}
 
               <div
                 className={
@@ -1617,46 +1855,6 @@ export default function CheckoutClient() {
                   </strong>
                 </div>
 
-                {subtotal >
-                  0 &&
-                  subtotal <
-                    2500 && (
-                    <div
-                      className={
-                        styles.freeDeliveryProgress
-                      }
-                    >
-                      <div>
-                        <span>
-                          {
-                            formatPrice(
-                              amountUntilFreeDelivery,
-                            )
-                          }{" "}
-                          EGP TO FREE
-                          DELIVERY
-                        </span>
-                      </div>
-
-                      <div
-                        className={
-                          styles.progressTrack
-                        }
-                      >
-                        <span
-                          style={{
-                            width: `${Math.min(
-                              100,
-                              (subtotal /
-                                2500) *
-                                100,
-                            )}%`,
-                          }}
-                        />
-                      </div>
-                    </div>
-                  )}
-
                 <div
                   className={
                     styles.grandTotal
@@ -1682,23 +1880,27 @@ export default function CheckoutClient() {
               >
                 <Truck
                   size={18}
-                  strokeWidth={1.4}
+                  strokeWidth={
+                    1.4
+                  }
                 />
 
                 <span>
-                  Greater Cairo: estimated 1–3 business
-                  days. Governorates: estimated 2–5
-                  business days.
+                  Delivery across
+                  Egypt.
                 </span>
               </div>
             </div>
           </aside>
-        </form>
+        </div>
       </main>
 
+      {/* =====================================================
+          MOBILE STICKY ACTION
+          ===================================================== */}
       <div
         className={
-          styles.mobilePlaceOrder
+          styles.mobileAction
         }
       >
         <div>
@@ -1722,11 +1924,15 @@ export default function CheckoutClient() {
               0
           }
           onClick={
-            submitFromMobileBar
+            step === 1
+              ? continueToConfirm
+              : placeOrder
           }
         >
           {submitting
             ? "PLACING..."
+            : step === 1
+            ? "CONTINUE"
             : "PLACE ORDER"}
         </button>
       </div>
