@@ -898,7 +898,7 @@ export default function DesktopMegaMenu({
             styles.columns
           }
         >
-          {t(menu.columns.map(
+          {menu.columns.map(
             (
               column,
             ) => (
@@ -917,7 +917,7 @@ export default function DesktopMegaMenu({
                 </strong>
 
                 <div>
-                  {t(column.items.map(
+                  {column.items.map(
                     (
                       item,
                     ) => (
@@ -935,11 +935,11 @@ export default function DesktopMegaMenu({
                         }
                       </Link>
                     ),
-                  ))}
+                  )}
                 </div>
               </section>
             ),
-          ))}
+          )}
         </div>
 
         <aside

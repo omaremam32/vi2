@@ -73,13 +73,15 @@
 
   font-size:
     clamp(
-      48px,
-      4.7vw,
-      70px
+      64px,
+      6.4vw,
+      108px
     );
 
   font-weight: 400;
-  line-height: 0.84;
+  line-height: 0.82;
+  letter-spacing: -0.02em;
+  text-transform: uppercase;
 }
 
 .viewAll {
@@ -206,7 +208,9 @@
   }
 
   .titleWrap h2 {
-    font-size: 48px;
+    font-size: clamp(50px, 14vw, 64px);
+    line-height: 0.82;
+    letter-spacing: -0.02em;
   }
 
   .viewAll {

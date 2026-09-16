@@ -31,9 +31,11 @@
   margin: 0;
 
   font-family: var(--font-display), sans-serif;
-  font-size: clamp(68px, 8vw, 120px);
+  font-size: clamp(64px, 6.4vw, 108px);
   font-weight: 400;
-  line-height: 0.77;
+  line-height: 0.82;
+  letter-spacing: -0.02em;
+  text-transform: uppercase;
 }
 
 .heading > a {
@@ -201,9 +203,9 @@
 }
 
 .actionRow button {
-  min-height: 43px;
+  min-height: 52px;
 
-  padding: 0 14px;
+  padding: 0 24px;
 
   display: inline-flex;
   align-items: center;
@@ -211,15 +213,17 @@
   gap: 7px;
 
   border: 1px solid #181916;
+  border-radius: 1px;
 
   color: #f7f2ea;
   background: #181916;
 
   cursor: pointer;
 
-  font-size: 7px;
+  font-size: 10px;
   font-weight: 800;
-  letter-spacing: 0.08em;
+  letter-spacing: 0.11em;
+  text-transform: uppercase;
 }
 
 .card:nth-child(2) .actionRow button {
@@ -247,7 +251,9 @@
   }
 
   .heading h2 {
-    font-size: 66px;
+    font-size: clamp(50px, 14vw, 64px);
+    line-height: 0.82;
+    letter-spacing: -0.02em;
   }
 
   .heading > a {

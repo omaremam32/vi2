@@ -49,9 +49,11 @@
   margin: 0;
 
   font-family: var(--font-display), sans-serif;
-  font-size: clamp(46px, 4.4vw, 70px);
+  font-size: clamp(64px, 6.4vw, 108px);
   font-weight: 400;
   line-height: 0.82;
+  letter-spacing: -0.02em;
+  text-transform: uppercase;
 }
 
 .heading > a {
@@ -272,7 +274,9 @@
   }
 
   .heading h2 {
-    font-size: clamp(40px, 12vw, 54px);
+    font-size: clamp(50px, 14vw, 64px);
+    line-height: 0.82;
+    letter-spacing: -0.02em;
   }
 
   .heading > a {

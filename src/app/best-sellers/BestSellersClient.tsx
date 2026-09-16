@@ -217,7 +217,7 @@ export default function BestSellersClient({
             }
           />
 
-          <span>
+          <span data-arabic-text="الأكثر مبيعًا">
             Best Sellers
           </span>
         </nav>
@@ -232,7 +232,7 @@ export default function BestSellersClient({
               MOST-LOVED AT VI2
             </span>
 
-            <h1 data-arabic-text="الأكثر مبيعاً.">
+            <h1 data-arabic-text="الأكثر مبيعًا.">
               BEST
               <br />
               SELLERS.

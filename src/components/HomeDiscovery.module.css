@@ -88,13 +88,15 @@
 
   font-size:
     clamp(
-      57px,
-      5.3vw,
-      79px
+      64px,
+      6.4vw,
+      108px
     );
 
   font-weight: 400;
-  line-height: 0.78;
+  line-height: 0.82;
+  letter-spacing: -0.02em;
+  text-transform: uppercase;
 }
 
 .promise {
@@ -355,9 +357,10 @@
 
   margin-top: 17px;
 
-  font-size: 8px;
-  line-height: 1.2;
-  letter-spacing: 0.12em;
+  font-size: clamp(20px, 2vw, 25px);
+  line-height: 1.0;
+  text-transform: uppercase;
+  font-weight: 700;
 
   text-align: center;
 }
@@ -639,7 +642,8 @@
   }
 
   .goal > strong {
-    font-size: 7px;
+    font-size: clamp(18px, 4.5vw, 20px);
+    line-height: 1.0;
   }
 
   .short {
@@ -674,7 +678,9 @@
   }
 
   .heading h2 {
-    font-size: 47px;
+    font-size: clamp(50px, 14vw, 64px);
+    line-height: 0.82;
+    letter-spacing: -0.02em;
   }
 
   .viewAll {

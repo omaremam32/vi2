@@ -247,7 +247,7 @@ export default function Navbar() {
         deals:
           "العروض",
         best:
-          "الأكثر مبيعاً",
+          "الأكثر مبيعًا",
         new:
           "جديد",
         bundles:

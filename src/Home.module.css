@@ -306,17 +306,18 @@
   .heroContent h1 {
     max-width: 360px;
 
-    font-size: clamp(66px, 19vw, 86px);
-    line-height: 0.8;
+    font-size: clamp(56px, 16vw, 82px);
+    line-height: 0.78;
+    letter-spacing: -0.02em;
   }
 
   .heroContent p {
-    max-width: 315px;
+    max-width: 380px;
 
     margin-top: 18px;
 
-    font-size: 12px;
-    line-height: 1.5;
+    font-size: 14.5px;
+    line-height: 1.55;
   }
 
   .heroButton {
@@ -355,8 +356,9 @@
   }
 
   :global(.section-heading h2) {
-    font-size: clamp(54px, 15vw, 72px) !important;
+    font-size: clamp(50px, 14vw, 64px) !important;
     line-height: 0.82 !important;
+    letter-spacing: -0.02em !important;
   }
 
   :global(.category-grid) {
@@ -397,7 +399,8 @@
   }
 
   :global(.category-card h3) {
-    font-size: clamp(50px, 14vw, 64px) !important;
+    font-size: clamp(36px, 8vw, 44px) !important;
+    line-height: 0.90 !important;
   }
 
   :global(.simple-commerce-section) {
@@ -417,6 +420,8 @@
 
   :global(.simple-commerce-content h2) {
     font-size: clamp(72px, 21vw, 98px) !important;
+    line-height: 0.75 !important;
+    letter-spacing: -0.025em !important;
   }
 
   :global(.brand-statement) {
@@ -425,6 +430,12 @@
       18px !important;
 
     text-align: center !important;
+  }
+
+  :global(.brand-statement > span) {
+    font-size: clamp(54px, 12vw, 90px) !important;
+    line-height: 0.80 !important;
+    letter-spacing: -0.02em !important;
   }
 }
 

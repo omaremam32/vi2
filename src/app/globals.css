@@ -1,4 +1,8 @@
 :root {
+  --font-display: 'Bebas Neue', sans-serif;
+  --font-body: 'Inter', Arial, sans-serif;
+  --font-arabic: 'Cairo', Arial, sans-serif;
+
   --ink: #191a17;
   --black: #11120f;
 
@@ -2400,7 +2404,9 @@ img {
   }
 
   .section-heading h2 {
-    font-size: 64px;
+    font-size: clamp(50px, 14vw, 64px);
+    line-height: 0.82;
+    letter-spacing: -0.02em;
   }
 
   .category-grid {
@@ -2415,11 +2421,14 @@ img {
   }
 
   .category-card h3 {
-    font-size: 39px;
+    font-size: clamp(36px, 8vw, 44px);
+    line-height: 0.90;
   }
 
   .category-card p {
-    font-size: 8px;
+    font-size: 10px;
+    line-height: 1.6;
+    color: rgba(25, 26, 23, 0.64);
   }
 
   .category-art {
@@ -2499,10 +2508,12 @@ img {
   .simple-commerce-content h2 {
     font-size:
       clamp(
-        86px,
-        26vw,
-        120px
+        72px,
+        21vw,
+        98px
       );
+    line-height: 0.75;
+    letter-spacing: -0.025em;
   }
 
   .brand-statement {
@@ -2512,10 +2523,12 @@ img {
   .brand-statement > span {
     font-size:
       clamp(
-        70px,
-        22vw,
-        105px
+        54px,
+        12vw,
+        90px
       );
+    line-height: 0.80;
+    letter-spacing: -0.02em;
   }
 
   .footer {
@@ -2605,118 +2618,190 @@ textarea {
     sans-serif;
 }
 
-/* Display headings keep the old VI2 style */
+/* ============================================================
+   VI2 EXACT TYPOGRAPHY SYSTEM
+   ============================================================ */
+
+.font-display {
+  font-family: var(--font-display), sans-serif;
+}
+
+.font-body {
+  font-family: var(--font-body), Arial, sans-serif;
+}
+
+.font-arabic {
+  font-family: var(--font-arabic), Arial, sans-serif;
+}
+
+/* Headings & Display Elements (Bebas Neue 400 EN / Cairo 800-900 AR) */
 h1,
 h2,
 h3,
+.font-display {
+  font-family: var(--font-display), sans-serif;
+  text-transform: uppercase;
+}
+
+/* 1. Hero Main Heading (H1) */
+.hero-h1,
+.heroContent h1 {
+  font-family: var(--font-display), sans-serif;
+  font-size: clamp(96px, 8.4vw, 150px);
+  line-height: 0.77;
+  letter-spacing: -0.02em;
+  font-weight: 400;
+  text-transform: uppercase;
+}
+
+/* 2. Home Section Headings (H2) */
+.section-heading h2,
+.section-h2 {
+  font-family: var(--font-display), sans-serif;
+  font-size: clamp(64px, 6.4vw, 108px);
+  line-height: 0.82;
+  letter-spacing: -0.02em;
+  font-weight: 400;
+  text-transform: uppercase;
+}
+
+/* 3. Commerce Banner Headings (H2) */
+.simple-commerce-content h2,
+.commerce-banner-h2 {
+  font-family: var(--font-display), sans-serif;
+  font-size: clamp(85px, 9vw, 145px);
+  line-height: 0.73;
+  letter-spacing: -0.025em;
+  font-weight: 400;
+  text-transform: uppercase;
+}
+
+/* 4. Brand Statement Heading */
 .brand-statement > span,
-.footer-brand h2 {
-  font-family:
-    var(--font-display),
-    var(--font-body),
-    Arial,
-    sans-serif;
+.brand-statement-heading {
+  font-family: var(--font-display), sans-serif;
+  font-size: clamp(72px, 10vw, 165px);
+  line-height: 0.80;
+  letter-spacing: -0.02em;
+  font-weight: 400;
+  text-transform: uppercase;
 }
 
-/* Make all tiny labels readable in English */
-body :is(
-  small,
-  label,
-  button,
-  input,
-  select,
-  textarea
-) {
-  font-size: max(11px, 1em) !important;
+/* 5. Category Card Titles (H3) */
+.category-card h3,
+.category-card-title {
+  font-family: var(--font-display), sans-serif;
+  font-size: clamp(42px, 4vw, 63px);
+  line-height: 0.90;
+  font-weight: 400;
+  text-transform: uppercase;
 }
 
-body :is(
-  nav,
-  header,
-  footer,
-  main,
-  aside
-) :is(
-  span,
-  a,
-  strong,
-  b
-) {
-  font-size: max(10.5px, 1em);
-}
-
-/* Common small UI text across the site */
-body :is(
-  .eyebrow,
-  .kicker,
-  .badge,
-  .chip,
-  .tag,
-  .meta,
-  .caption
-) {
-  font-size: max(11px, 1em) !important;
-}
-
-/* Arabic: readable font, no cramped letter spacing */
-html[dir="rtl"] body {
-  font-family:
-    var(--font-arabic),
-    var(--font-body),
-    Arial,
-    sans-serif;
-}
-
-html[dir="rtl"] :is(
-  h1,
-  h2,
-  h3,
-  p,
-  span,
-  strong,
-  small,
-  a,
-  button,
-  label,
-  input,
-  select,
-  textarea
-) {
-  letter-spacing: 0 !important;
-  line-height: 1.45;
-}
-
-/* Arabic headings should not use the condensed English display face */
-html[dir="rtl"] :is(
-  h1,
-  h2,
-  h3,
-  .brand-statement > span,
-  .footer-brand h2
-) {
-  font-family:
-    var(--font-arabic),
-    Arial,
-    sans-serif !important;
-
+/* 6. Health Goals / Discovery Card Titles */
+.health-goal-title,
+.discovery-card-title {
+  font-size: clamp(20px, 2vw, 25px);
+  line-height: 1.0;
   font-weight: 700;
+  text-transform: uppercase;
 }
 
-/* Arabic small text needs extra size */
-html[dir="rtl"] body :is(
-  small,
-  label,
-  button,
-  input,
-  select,
-  textarea,
-  .eyebrow,
-  .kicker,
-  .badge,
-  .chip,
-  .tag,
-  .meta,
-  .caption
-) {
-  font-size: max(12px, 1em) !important;
+/* Body Copy & Text */
+.hero-subtitle,
+.heroContent p {
+  font-size: 15px;
+  line-height: 1.58;
+  font-weight: 400;
+  color: #2c2c28;
+  max-width: 380px;
+}
+
+p,
+.body-copy {
+  font-size: 14px;
+  line-height: 1.8;
+  font-weight: 400;
+  color: #636159;
+}
+
+.secondary-subtitle,
+.simple-commerce-content p {
+  font-size: 13px;
+  line-height: 1.8;
+  font-weight: 400;
+  color: rgba(241, 233, 223, 0.61);
+}
+
+.category-card p,
+.category-card-desc {
+  font-size: 10px;
+  line-height: 1.6;
+  font-weight: 400;
+  color: rgba(25, 26, 23, 0.64);
+}
+
+/* Responsive Headings & Titles (Mobile) */
+@media (max-width: 768px) {
+  .hero-h1,
+  .heroContent h1 {
+    font-size: clamp(56px, 16vw, 82px);
+    line-height: 0.78;
+  }
+
+  .section-heading h2,
+  .section-h2 {
+    font-size: clamp(50px, 14vw, 64px);
+    line-height: 0.82;
+  }
+
+  .simple-commerce-content h2,
+  .commerce-banner-h2 {
+    font-size: clamp(72px, 21vw, 98px);
+    line-height: 0.75;
+  }
+
+  .brand-statement > span,
+  .brand-statement-heading {
+    font-size: clamp(54px, 12vw, 90px);
+    line-height: 0.80;
+  }
+
+  .category-card h3,
+  .category-card-title {
+    font-size: clamp(36px, 8vw, 44px);
+  }
+
+  .health-goal-title,
+  .discovery-card-title {
+    font-size: clamp(18px, 4.5vw, 20px);
+    line-height: 1.0;
+  }
+}
+
+/* ============================================================
+   3. STRICT ARABIC (RTL) RULES
+   ============================================================ */
+[dir="rtl"] {
+  font-family: var(--font-arabic), Arial, sans-serif;
+  text-align: right;
+}
+
+[dir="rtl"] h1,
+[dir="rtl"] h2,
+[dir="rtl"] h3,
+[dir="rtl"] .font-display,
+[dir="rtl"] .brand-statement > span {
+  font-family: var(--font-arabic), Arial, sans-serif !important;
+  letter-spacing: 0 !important;
+  font-weight: 800;
+  line-height: 1.15;
+}
+
+[dir="rtl"] p,
+[dir="rtl"] .body-copy {
+  line-height: 1.75;
+}
+
+[dir="rtl"] .eyebrow {
+  letter-spacing: 0.06em;
 }

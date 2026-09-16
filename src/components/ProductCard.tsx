@@ -10,6 +10,7 @@ import {
 import type { Product } from "@/types/product";
 import { getStockLabel } from "@/lib/catalogMeta";
 import { useCart } from "@/context/CartContext";
+import { useLanguage } from "@/context/LanguageContext";
 import styles from "./ProductCard.module.css";
 
 function formatPrice(value: number) {
@@ -22,6 +23,7 @@ export default function ProductCard({
   product: Product;
 }) {
   const { addItem } = useCart();
+  const { t } = useLanguage();
 
   return (
     <article className={styles.card}>
@@ -31,8 +33,8 @@ export default function ProductCard({
         aria-label={`View ${product.name}`}
       >
         {product.badge && (
-          <span className={styles.badge}>
-            {product.badge}
+          <span className={styles.badge} data-arabic-text={t(product.badge)}>
+            {t(product.badge)}
           </span>
         )}
 
@@ -62,6 +64,11 @@ export default function ProductCard({
             />
 
             <span>{product.rating}</span>
+            {product.reviewCount ? (
+              <span className={styles.reviewCount}>
+                ({product.reviewCount})
+              </span>
+            ) : null}
           </div>
         </div>
 
@@ -73,7 +80,7 @@ export default function ProductCard({
         </Link>
 
         <p className={styles.meta}>
-          {[product.flavor, product.size]
+          {[product.flavor, product.size, product.servings ? `${product.servings} Servings` : ""]
             .filter(Boolean)
             .join(" · ")}
         </p>

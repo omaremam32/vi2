@@ -159,7 +159,7 @@ export default function HomeBestSellers() {
               <span>{t("POPULAR RIGHT NOW")}</span>
             </div>
 
-            <h2>{t("BEST SELLERS")}</h2>
+            <h2 data-arabic-text="الأكثر مبيعًا">{t("BEST SELLERS")}</h2>
           </div>
 
           <button
@@ -184,7 +184,7 @@ export default function HomeBestSellers() {
             styles.tabs
           }
         >
-          {t(bestSellerTabs.map(
+          {bestSellerTabs.map(
             (
               tab,
             ) => (
@@ -210,7 +210,7 @@ export default function HomeBestSellers() {
                 }
               </button>
             ),
-          ))}
+          )}
         </div>
 
         <div

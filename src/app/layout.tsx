@@ -19,12 +19,14 @@ const bebasNeue = Bebas_Neue({
 
 const inter = Inter({
   subsets: ["latin"],
+  weight: ["400", "500", "600", "700", "800"],
   variable: "--font-body",
   display: "swap",
 });
 
 const cairo = Cairo({
   subsets: ["arabic", "latin"],
+  weight: ["400", "500", "600", "700", "800", "900"],
   variable: "--font-arabic",
   display: "swap",
 });
@@ -47,6 +49,12 @@ export default function RootLayout({
       data-scroll-behavior="smooth"
     >
       <head>
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+        <link
+          href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Cairo:wght@400;500;600;700;800;900&family=Inter:wght@400;500;600;700;800&display=swap"
+          rel="stylesheet"
+        />
         <Script id="vi2-language-init" strategy="beforeInteractive">
           {`
             try {

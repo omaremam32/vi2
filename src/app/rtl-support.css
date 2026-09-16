@@ -3,21 +3,32 @@ body {
   overflow-x: clip;
 }
 
+[dir="rtl"],
 html[dir="rtl"] body {
   direction: rtl;
-
-  font-family:
-    var(--font-arabic),
-    var(--font-body),
-    Arial,
-    sans-serif;
+  font-family: var(--font-arabic), Arial, sans-serif;
+  text-align: right;
 }
 
-/* Arabic readable typography */
-html[dir="rtl"] :is(
-  h1,
-  h2,
-  h3,
+/* Arabic Headings: Never Bebas Neue, use Cairo 800, line-height 1.15, zero letter spacing */
+[dir="rtl"] h1,
+[dir="rtl"] h2,
+[dir="rtl"] h3,
+[dir="rtl"] .font-display {
+  font-family: var(--font-arabic), Arial, sans-serif !important;
+  letter-spacing: 0 !important;
+  font-weight: 800;
+  line-height: 1.15;
+}
+
+/* Arabic Body copy: line-height 1.7 - 1.8 */
+[dir="rtl"] p,
+[dir="rtl"] .body-copy {
+  line-height: 1.75;
+}
+
+/* Arabic letter-spacing reset (cursive), eyebrows may have slight tracking */
+[dir="rtl"] :is(
   p,
   span,
   strong,
@@ -29,40 +40,11 @@ html[dir="rtl"] :is(
   select,
   textarea
 ) {
-  letter-spacing: 0 !important;
-  line-height: 1.45;
+  letter-spacing: 0;
 }
 
-html[dir="rtl"] :is(
-  h1,
-  h2,
-  h3
-) {
-  font-family:
-    var(--font-arabic),
-    Arial,
-    sans-serif !important;
-
-  font-weight: 700;
-}
-
-/* Make tiny Arabic UI text visible */
-html[dir="rtl"] body :is(
-  small,
-  label,
-  button,
-  input,
-  select,
-  textarea,
-  .eyebrow,
-  .kicker,
-  .badge,
-  .chip,
-  .tag,
-  .meta,
-  .caption
-) {
-  font-size: max(12px, 1em) !important;
+[dir="rtl"] .eyebrow {
+  letter-spacing: 0.06em !important;
 }
 
 /* Keep form fields aligned correctly */

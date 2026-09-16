@@ -92,11 +92,18 @@
   font-weight: 700;
 }
 
+.reviewCount {
+  font-size: 7.5px;
+  font-weight: 600;
+  color: #8c877f;
+}
+
 .name {
   margin-top: 7px;
 
   display: inline-block;
 
+  color: #191a17;
   font-size: 13px;
   font-weight: 700;
   line-height: 1.35;
@@ -112,6 +119,7 @@
   color: #8c877f;
 
   font-size: 9px;
+  font-weight: 400;
 
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -296,9 +304,10 @@
 
   color: #697153;
 
-  font-size: 7px;
+  font-size: 7.5px;
   font-weight: 800;
   letter-spacing: 0.08em;
+  text-transform: uppercase;
 }
 
 .stockLine > span {
@@ -311,9 +320,9 @@
 }
 
 .stockLine > span.lowStock {
-  background: #9c654e;
+  background: #92583b;
 }
 
 .stockLine:has(.lowStock) {
-  color: #9c654e;
+  color: #92583b;
 }

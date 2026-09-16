@@ -112,10 +112,10 @@
 .brand {
   overflow: hidden;
 
-  color: #777168;
+  color: #777269;
 
-  font-size: 6.4px;
-  font-weight: 850;
+  font-size: 8px;
+  font-weight: 800;
   letter-spacing: 0.09em;
   text-transform: uppercase;
 
@@ -130,10 +130,10 @@
 
   overflow: hidden;
 
-  color: #20211d;
+  color: #191a17;
 
-  font-size: 11px;
-  font-weight: 720;
+  font-size: 13px;
+  font-weight: 700;
   line-height: 1.35;
 
   display: -webkit-box;
@@ -149,19 +149,21 @@
 
   gap: 4px;
 
-  color: #a67e23;
+  color: #292a26;
 }
 
 .rating strong {
-  color: #33352f;
+  color: #292a26;
 
-  font-size: 8px;
+  font-size: 9px;
+  font-weight: 700;
 }
 
 .rating span {
-  color: #6e6a62;
+  color: #8c877f;
 
-  font-size: 7px;
+  font-size: 7.5px;
+  font-weight: 600;
 }
 
 .bottom {
@@ -185,16 +187,17 @@
 }
 
 .price strong {
-  color: #191a16;
+  color: #181916;
 
   font-size: 12px;
-  font-weight: 780;
+  font-weight: 700;
 }
 
 .price span {
-  color: #989187;
+  color: #aaa59d;
 
-  font-size: 7px;
+  font-size: 9px;
+  font-weight: 400;
 
   text-decoration:
     line-through;
@@ -215,16 +218,17 @@
   gap: 6px;
 
   border: 0;
-  border-radius: 7px;
+  border-radius: 2px;
 
   color: #f8f4ed;
   background: #626a55;
 
   cursor: pointer;
 
-  font-size: 7px;
-  font-weight: 850;
-  letter-spacing: 0.07em;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.11em;
+  text-transform: uppercase;
 
   transition:
     background-color 150ms ease,
