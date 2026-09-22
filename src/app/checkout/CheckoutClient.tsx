@@ -5,7 +5,6 @@ import {
   ArrowLeft,
   ArrowRight,
   Check,
-  CheckCircle2,
   ChevronDown,
   CreditCard,
   Landmark,
@@ -26,8 +25,16 @@ import {
 } from "next/navigation";
 
 import { useCart } from "@/context/CartContext";
-import { services } from "@/services";
-import type { ShippingOption } from "@/domain/shipping";
+import {
+  getShippingOptions,
+  getProductByHandle,
+  setCartAddress,
+  setCartShippingMethod,
+  completeCheckout,
+  createCart,
+  addCartItem,
+} from "@/lib/medusa";
+import type { ShippingOption } from "@/types/shipping";
 import type { Product } from "@/types/product";
 
 import styles from "./Checkout.module.css";
@@ -146,10 +153,10 @@ export default function CheckoutClient() {
     items,
     clearCart,
     cartId,
+    cart,
     promotions,
     applyPromotion,
     removePromotion,
-    discountTotal,
   } = useCart();
 
   const [shippingOptions, setShippingOptions] = useState<ShippingOption[]>([]);
@@ -160,12 +167,11 @@ export default function CheckoutClient() {
 
   useEffect(() => {
     if (!cartId) return;
-    services.shippingService
-      .getShippingOptionsForCart(cartId)
+    getShippingOptions(cartId)
       .then((opts) => {
         setShippingOptions(opts);
-        if (opts.length > 0 && !selectedShippingOptionId) {
-          setSelectedShippingOptionId(opts[0].id);
+        if (opts.length > 0) {
+          setSelectedShippingOptionId((prev) => prev || opts[0].id);
         }
       })
       .catch(() => {});
@@ -183,39 +189,14 @@ export default function CheckoutClient() {
   const [buyNowProduct, setBuyNowProduct] =
     useState<Product | undefined>(undefined);
 
-  // Fetch buyNow product from Medusa (async) instead of local data
+  // Fetch buyNow product from Medusa using SDK service
   useEffect(() => {
     if (!buyNowSlug) return;
-    fetch(
-      `${process.env.NEXT_PUBLIC_MEDUSA_BACKEND_URL || "http://localhost:9000"}/store/products?handle=${encodeURIComponent(buyNowSlug)}&fields=id,handle,title,thumbnail,metadata,variants.id,variants.prices`,
-      {
-        headers: {
-          "x-publishable-api-key":
-            process.env.NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY || "",
-        },
-      }
-    )
-      .then((r) => r.json())
-      .then((data) => {
-        const p = data.products?.[0];
-        if (!p) return;
-        const variant = p.variants?.[0];
-        const priceRaw = variant?.prices?.[0]?.amount ?? 0;
-        setBuyNowProduct({
-          id: p.id,
-          slug: p.handle,
-          variantId: variant?.id,
-          brand: String(p.metadata?.brand ?? "Vi2"),
-          name: p.title,
-          shortName: String(p.metadata?.shortName ?? p.title),
-          category: String(p.metadata?.category ?? ""),
-          description: p.description ?? "",
-          price: priceRaw / 100,
-          rating: Number(p.metadata?.rating ?? 0),
-          reviewCount: Number(p.metadata?.reviewCount ?? 0),
-          image: p.thumbnail ?? "",
-          stock: Number(p.metadata?.stock ?? 99),
-        });
+    getProductByHandle(buyNowSlug)
+      .then((product) => {
+        if (product) {
+          setBuyNowProduct(product);
+        }
       })
       .catch(() => {});
   }, [buyNowSlug]);
@@ -256,31 +237,33 @@ export default function CheckoutClient() {
       items,
     ]);
 
-  const subtotal = useMemo(
-    () =>
-      checkoutItems.reduce(
-        (
-          sum,
-          item,
-        ) =>
-          sum +
-          item.product.price *
-            item.quantity,
-        0,
-      ),
-    [checkoutItems],
-  );
+  const cartSubtotal = cart?.itemSubtotal ?? 0;
+  const cartShippingTotal = cart?.shippingTotal ?? 0;
+  const cartDiscountTotal = cart?.discountTotal ?? 0;
+  const cartTotal = cart?.total ?? 0;
+
+  // Medusa is authoritative for totals; fallback to item sum only while cart initializes
+  const subtotal = useMemo(() => {
+    if (cartSubtotal > 0) return cartSubtotal;
+    return checkoutItems.reduce(
+      (sum, item) => sum + item.product.price * item.quantity,
+      0,
+    );
+  }, [cartSubtotal, checkoutItems]);
 
   const selectedOption = shippingOptions.find(
     (o) => o.id === selectedShippingOptionId,
   );
   const delivery = selectedOption
     ? selectedOption.amount
-    : subtotal >= 2500 || subtotal === 0
-      ? 0
-      : 85;
+    : cartShippingTotal;
 
-  const total = Math.max(0, subtotal + delivery - discountTotal);
+  const discountTotal = cartDiscountTotal;
+
+  const total = useMemo(() => {
+    if (cartTotal > 0) return cartTotal;
+    return Math.max(0, subtotal + delivery - discountTotal);
+  }, [cartTotal, subtotal, delivery, discountTotal]);
 
   const amountUntilFreeDelivery =
     Math.max(
@@ -445,11 +428,11 @@ export default function CheckoutClient() {
     try {
       let activeCartId = cartId;
       if (!activeCartId || buyNowProduct) {
-        const created = await services.cartService.createCart();
+        const created = await createCart();
         activeCartId = created.id;
         for (const item of checkoutItems) {
           const vId = item.product.variantId || item.product.id;
-          await services.cartService.addItem(activeCartId, vId, item.quantity);
+          await addCartItem(activeCartId, vId, item.quantity);
         }
       }
 
@@ -457,10 +440,12 @@ export default function CheckoutClient() {
       const nameParts = form.name.trim().split(" ");
       const firstName = nameParts[0] || "Customer";
       const lastName = nameParts.slice(1).join(" ") || "-";
+      const guestRand = Math.random().toString(36).substring(2, 8);
+      const email = form.email.trim() || `guest+${guestRand}@vi2.local`;
 
-      await services.cartService.setAddress(
+      await setCartAddress(
         activeCartId,
-        form.email.trim() || `guest+${Date.now()}@vi2.local`,
+        email,
         {
           firstName,
           lastName,
@@ -475,7 +460,7 @@ export default function CheckoutClient() {
       // 2. Set Shipping Method if selected
       if (selectedShippingOptionId) {
         try {
-          await services.cartService.setShippingMethod(
+          await setCartShippingMethod(
             activeCartId,
             selectedShippingOptionId,
           );
@@ -484,15 +469,16 @@ export default function CheckoutClient() {
         }
       }
 
-      // 3. Complete Cart on Medusa
-      const completion = await services.cartService.completeCart(
+      // 3. Authoritative Cart Completion on Medusa
+      const completion = await completeCheckout(
         activeCartId,
         "pp_system_default",
       );
 
+      const refRandom = Math.floor(100000 + Math.random() * 900000).toString();
       const reference = completion.ok
         ? `VI2-${completion.orderId.slice(-6).toUpperCase()}`
-        : `VI2-${String(Date.now()).slice(-6)}`;
+        : `VI2-${refRandom}`;
 
       window.localStorage.setItem(
         "vi2-last-order",

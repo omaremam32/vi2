@@ -7,11 +7,6 @@ export type Customer = {
   hasAccount?: boolean;
 };
 
-export type CustomerAuthSession = {
-  token: string;
-  customer?: Customer;
-};
-
 export type RegisterCredentials = {
   email: string;
   password: string;

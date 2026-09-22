@@ -17,34 +17,35 @@ import {
 
 import styles from "./Categories.module.css";
 
+function filterGroups(
+  groups: typeof primaryCatalogGroups,
+  normalized: string,
+) {
+  return groups
+    .map((group) => ({
+      ...group,
+      items: group.items.filter(
+        (item) =>
+          !normalized ||
+          item.toLowerCase().includes(normalized) ||
+          group.title.toLowerCase().includes(normalized),
+      ),
+    }))
+    .filter((group) => group.items.length > 0);
+}
+
 export default function CategoriesClient() {
   const [query, setQuery] = useState("");
 
-  const normalized =
-    query.trim().toLowerCase();
-
-  const filterGroups = (
-    groups: typeof primaryCatalogGroups,
-  ) =>
-    groups
-      .map((group) => ({
-        ...group,
-        items: group.items.filter(
-          (item) =>
-            !normalized ||
-            item.toLowerCase().includes(normalized) ||
-            group.title.toLowerCase().includes(normalized),
-        ),
-      }))
-      .filter((group) => group.items.length > 0);
+  const normalized = query.trim().toLowerCase();
 
   const productGroups = useMemo(
-    () => filterGroups(primaryCatalogGroups),
+    () => filterGroups(primaryCatalogGroups, normalized),
     [normalized],
   );
 
   const healthGroups = useMemo(
-    () => filterGroups(healthTopicGroups),
+    () => filterGroups(healthTopicGroups, normalized),
     [normalized],
   );
 

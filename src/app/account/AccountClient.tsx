@@ -17,8 +17,8 @@ import {
 import { useCart } from "@/context/CartContext";
 import type { Product } from "@/types/product";
 import { useAuth } from "@/context/AuthContext";
-import { services } from "@/services";
-import type { Order } from "@/domain/order";
+import { services } from "@/lib/medusa";
+import type { Order } from "@/types/order";
 
 import styles from "./Account.module.css";
 

@@ -72,7 +72,6 @@ function walkAndTranslate(root: Node) {
 export default function ArabicLocalization() {
   useEffect(() => {
     let observer: MutationObserver | undefined;
-    let startTimer: ReturnType<typeof setTimeout> | undefined;
     let applying = false;
     const applyLocale = (nodes?: Node[]) => {
       if (applying) return;
@@ -90,7 +89,7 @@ export default function ArabicLocalization() {
     // hydrating. Mutating their text immediately would make React compare the
     // Arabic DOM with the English server tree. Keep the early RTL direction
     // from layout.tsx, then localize once hydration has had a chance to settle.
-    startTimer = setTimeout(() => {
+    const startTimer = setTimeout(() => {
       applyLocale();
       observer = new MutationObserver((mutations) => {
         if (mutations.some((mutation) => mutation.type === "attributes" && mutation.attributeName === "dir")) {

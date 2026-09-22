@@ -1,14 +1,21 @@
 import { Suspense } from "react";
 
-import { getMedusaProducts } from "@/lib/medusa-products";
+import { getProducts, getCategories } from "@/lib/medusa";
 import ShopClient from "./ShopClient";
 
 export default async function ShopPage() {
-  const products = await getMedusaProducts();
+  const [products, categoriesData] = await Promise.all([
+    getProducts(),
+    getCategories(),
+  ]);
+
+  const categoryNames = categoriesData
+    .map((c) => c.name)
+    .filter(Boolean) as string[];
 
   return (
     <Suspense fallback={<ShopLoading />}>
-      <ShopClient products={products} />
+      <ShopClient products={products} initialCategories={categoryNames} />
     </Suspense>
   );
 }

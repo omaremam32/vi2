@@ -27,7 +27,7 @@ import { getArabicProductSearchText } from "@/lib/arabicLocalization";
 
 import styles from "./Shop.module.css";
 
-const categories = [
+const defaultCategories = [
   "All",
   "Protein",
   "Creatine",
@@ -82,7 +82,26 @@ type SortValue =
   | "price-high"
   | "rating";
 
-export default function ShopClient({ products }: { products: Product[] }) {
+export default function ShopClient({
+  products,
+  initialCategories = [],
+}: {
+  products: Product[];
+  initialCategories?: string[];
+}) {
+  const categories = useMemo(() => {
+    if (initialCategories && initialCategories.length > 0) {
+      return ["All", ...initialCategories];
+    }
+    const derived = Array.from(
+      new Set(products.map((p) => p.category).filter(Boolean)),
+    ).sort();
+    if (derived.length > 0) {
+      return ["All", ...derived];
+    }
+    return defaultCategories;
+  }, [initialCategories, products]);
+
   const brands = [
     "All Brands",
     ...Array.from(new Set(products.map((p) => p.brand))).sort(),

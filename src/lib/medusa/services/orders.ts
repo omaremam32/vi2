@@ -1,12 +1,11 @@
-import type { Order, OrderPaymentStatus, OrderStatus } from "@/domain/order";
-import type { IOrderService } from "@/services/contracts/IOrderService";
-import { defaultApiClient } from "./MedusaApiClient";
+import { medusa } from "../client";
+import type { Order, OrderPaymentStatus, OrderStatus } from "@/types/order";
 
-const ORDER_FIELDS =
+export const ORDER_FIELDS =
   "*items,*items.variant,*items.product,*shipping_address,*shipping_methods";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-function mapMedusaOrder(o: any): Order {
+export function mapMedusaOrder(o: any): Order {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const items = (o.items || []).map((item: any) => {
     const product = item.product || {};
@@ -32,7 +31,8 @@ function mapMedusaOrder(o: any): Order {
   return {
     id: o.id,
     displayId: o.display_id,
-    reference: o.metadata?.vi2_reference || `VI2-${o.display_id || o.id.slice(-6)}`,
+    reference:
+      o.metadata?.vi2_reference || `VI2-${o.display_id || o.id.slice(-6)}`,
     status: (o.status || "pending") as OrderStatus,
     paymentStatus: (o.payment_status || "not_paid") as OrderPaymentStatus,
     currencyCode: (o.currency_code || "EGP").toUpperCase(),
@@ -64,33 +64,26 @@ function mapMedusaOrder(o: any): Order {
   };
 }
 
-export class MedusaOrderService implements IOrderService {
-  private apiClient = defaultApiClient;
-
-  public async getCustomerOrders(limit = 20): Promise<Order[]> {
-    const token = this.apiClient.getToken();
-    if (!token) return [];
-
-    try {
-      const data = await this.apiClient.request<{ orders?: unknown[] }>(
-        `/store/orders?limit=${limit}&fields=${ORDER_FIELDS}`,
-      );
-      const orders = data.orders || [];
-      return orders.map(mapMedusaOrder);
-    } catch {
-      return [];
-    }
+export async function getCustomerOrders(limit = 20): Promise<Order[]> {
+  try {
+    const { orders } = await medusa.store.order.list({
+      limit,
+      fields: ORDER_FIELDS,
+    });
+    return (orders || []).map(mapMedusaOrder);
+  } catch {
+    return [];
   }
+}
 
-  public async getOrder(orderId: string): Promise<Order | null> {
-    try {
-      const data = await this.apiClient.request<{ order?: unknown }>(
-        `/store/orders/${orderId}?fields=${ORDER_FIELDS}`,
-      );
-      if (!data.order) return null;
-      return mapMedusaOrder(data.order);
-    } catch {
-      return null;
-    }
+export async function getOrder(orderId: string): Promise<Order | null> {
+  try {
+    const { order } = await medusa.store.order.retrieve(orderId, {
+      fields: ORDER_FIELDS,
+    });
+    if (!order) return null;
+    return mapMedusaOrder(order);
+  } catch {
+    return null;
   }
 }

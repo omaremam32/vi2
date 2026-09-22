@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
 
-import { getMedusaProductByHandle, getMedusaProducts } from "@/lib/medusa-products";
+import { getProductByHandle, getProducts } from "@/lib/medusa";
 import ProductDetailClient from "./ProductDetailClient";
 
 type ProductPageProps = {
@@ -12,8 +12,8 @@ export default async function ProductPage({
 }: ProductPageProps) {
   const { slug } = await params;
   const [product, allProducts] = await Promise.all([
-    getMedusaProductByHandle(slug),
-    getMedusaProducts(),
+    getProductByHandle(slug),
+    getProducts(),
   ]);
 
   if (!product) {

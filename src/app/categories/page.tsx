@@ -1,5 +1,5 @@
-import { redirect } from "next/navigation";
+import CategoriesClient from "./CategoriesClient";
 
 export default function CategoriesPage() {
-  redirect("/shop");
+  return <CategoriesClient />;
 }
