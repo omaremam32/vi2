@@ -1049,20 +1049,34 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
     document.documentElement.dir = language === "ar" ? "rtl" : "ltr";
     document.body.dataset.locale = language;
 
-    const translatePage = () => {
-      translateDomText(document.body, language);
+    const observerOptions: MutationObserverInit = {
+      childList: true,
+      subtree: true,
     };
 
-    window.requestAnimationFrame(translatePage);
-
     const observer = new MutationObserver(() => {
-      window.requestAnimationFrame(translatePage);
+      // Disconnect before translating so the DOM writes we are about to make
+      // don't re-trigger this callback and cause an infinite loop.
+      observer.disconnect();
+
+      window.requestAnimationFrame(() => {
+        translateDomText(document.body, language);
+        // Reconnect after the translation paint so future dynamic content
+        // (e.g. lazy-loaded components) still gets translated.
+        observer.observe(document.body, observerOptions);
+      });
     });
 
-    observer.observe(document.body, {
-      childList: true,
-      characterData: true,
-      subtree: true,
+    // Initial translation pass on language change.
+    window.requestAnimationFrame(() => {
+      translateDomText(document.body, language);
+      observer.observe(document.body, observerOptions);
+      // Reveal page after translation — removes the opacity:0 set by the
+      // beforeInteractive script so there is no English→Arabic flash on load.
+      if (document.documentElement.style.opacity === "0") {
+        document.documentElement.style.transition = "opacity 0.15s ease";
+        document.documentElement.style.opacity = "1";
+      }
     });
 
     return () => {

@@ -12,16 +12,15 @@ import {
 } from "next/navigation";
 
 import { useCart } from "@/context/CartContext";
+import { useLanguage } from "@/context/LanguageContext";
 
 import styles from "./MobileBottomNav.module.css";
 
 type Props = {
-  isArabic: boolean;
   onOpenSearch: () => void;
 };
 
 export default function MobileBottomNav({
-  isArabic,
   onOpenSearch,
 }: Props) {
   const pathname =
@@ -31,6 +30,8 @@ export default function MobileBottomNav({
     itemCount,
     openCart,
   } = useCart();
+
+  const { isArabic } = useLanguage();
 
   if (
     pathname.startsWith(

@@ -14,7 +14,7 @@ import {
 } from "react";
 
 import ProductCard from "@/components/ProductCard";
-import { products } from "@/data/products";
+import type { Product } from "@/types/product";
 import {
   getProductForm,
   getProductHealthGoals,
@@ -37,12 +37,7 @@ const categories = [
   "Mass Gainer",
 ];
 
-const brands = [
-  "All Brands",
-  ...Array.from(
-    new Set(products.map((product) => product.brand)),
-  ).sort(),
-];
+
 
 const popularSearches = [
   "Creatine",
@@ -87,7 +82,12 @@ type SortValue =
   | "price-high"
   | "rating";
 
-export default function ShopClient() {
+export default function ShopClient({ products }: { products: Product[] }) {
+  const brands = [
+    "All Brands",
+    ...Array.from(new Set(products.map((p) => p.brand))).sort(),
+  ];
+
   const searchParams = useSearchParams();
 
   const requestedCategory =

@@ -101,11 +101,10 @@ export default function ArabicLocalization() {
         const added: Node[] = [];
         for (const mutation of mutations) {
           if (mutation.type === "childList") added.push(...mutation.addedNodes);
-          else if (mutation.type === "characterData") added.push(mutation.target);
         }
         if (added.length) applyLocale(added);
       });
-      observer.observe(document.documentElement, { attributes: true, attributeFilter: ["dir"], childList: true, characterData: true, subtree: true });
+      observer.observe(document.documentElement, { attributes: true, attributeFilter: ["dir"], childList: true, subtree: true });
     }, 250);
     return () => {
       if (startTimer) clearTimeout(startTimer);

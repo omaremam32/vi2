@@ -22,9 +22,7 @@ import {
   useRouter,
 } from "next/navigation";
 
-import {
-  saveFrontendAccount,
-} from "@/lib/frontendAuth";
+import { useAuth } from "@/context/AuthContext";
 
 import styles from "../AccountAuth.module.css";
 
@@ -56,8 +54,8 @@ function validEgyptPhone(
 }
 
 export default function CreateAccountClient() {
-  const router =
-    useRouter();
+  const router = useRouter();
+  const { register } = useAuth();
 
   const [firstName, setFirstName] =
     useState("");
@@ -147,30 +145,22 @@ export default function CreateAccountClient() {
 
     setLoading(true);
 
-    await new Promise(
-      (resolve) =>
-        window.setTimeout(
-          resolve,
-          500,
-        ),
-    );
-
-    saveFrontendAccount({
-      firstName:
-        firstName.trim(),
-      lastName:
-        lastName.trim(),
-      fullName:
-        `${firstName.trim()} ${lastName.trim()}`,
-      phone:
-        normalizeEgyptPhone(
-          phone,
-        ),
-      email:
-        email
-          .trim()
-          .toLowerCase(),
+    const result = await register({
+      email: email.trim().toLowerCase(),
+      password,
+      firstName: firstName.trim(),
+      lastName: lastName.trim(),
+      phone: normalizeEgyptPhone(phone),
     });
+
+    if (!result.ok) {
+      setError(
+        result.message ??
+          "Could not create your account. Please try again.",
+      );
+      setLoading(false);
+      return;
+    }
 
     setSuccess(
       "Your Vi2 account is ready.",

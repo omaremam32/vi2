@@ -17,8 +17,8 @@ html[dir="rtl"] body {
 [dir="rtl"] .font-display {
   font-family: var(--font-arabic), Arial, sans-serif !important;
   letter-spacing: 0 !important;
-  font-weight: 800;
-  line-height: 1.15;
+  font-weight: 800 !important;
+  line-height: 1.15 !important;
 }
 
 /* Arabic Body copy: line-height 1.7 - 1.8 */
@@ -109,4 +109,37 @@ html[dir="rtl"] .cart-item-name,
 html[dir="rtl"] .product-title,
 html[dir="rtl"] .product-name {
   line-height: 1.65;
+}
+
+/* ================================================================
+   ARABIC HEADING SIZE SCALE
+   Cairo is a proportional font, not condensed like Bebas Neue.
+   At equal px, Arabic text occupies ~2–3× the width of Bebas Neue.
+   Override heading sizes so Cairo text never overflows on mobile.
+   ================================================================ */
+
+/* Desktop Arabic heading scale */
+[dir="rtl"] h1 {
+  font-size: clamp(44px, 5.5vw, 86px) !important;
+}
+
+[dir="rtl"] h2 {
+  font-size: clamp(34px, 4vw, 60px) !important;
+}
+
+/* Mobile Arabic heading scale */
+@media (max-width: 760px) {
+  [dir="rtl"] h1 {
+    font-size: clamp(28px, 7.5vw, 38px) !important;
+  }
+
+  [dir="rtl"] h2 {
+    font-size: clamp(24px, 6.5vw, 32px) !important;
+  }
+
+  /* Mobile slide-in nav links: Bebas Neue 48–76px → Cairo ~26–34px */
+  [dir="rtl"] .mobile-nav a {
+    font-size: clamp(26px, 7vw, 34px) !important;
+    line-height: 1.2 !important;
+  }
 }

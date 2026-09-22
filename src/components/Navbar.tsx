@@ -29,11 +29,7 @@ import MobileBottomNav from "@/components/MobileBottomNav";
 import DesktopMegaMenu, { type MegaMenuKey } from "@/components/DesktopMegaMenu";
 import AccountDropdown from "@/components/AccountDropdown";
 import { useCart } from "@/context/CartContext";
-import {
-  getFrontendAccount,
-  isFrontendSignedIn,
-  signOutFrontend,
-} from "@/lib/frontendAuth";
+import { useAuth } from "@/context/AuthContext";
 
 import styles from "./Navbar.module.css";
 
@@ -63,10 +59,8 @@ export default function Navbar() {
   const [accountOpen, setAccountOpen] =
     useState(false);
 
-  const [
-    accountFirstName,
-    setAccountFirstName,
-  ] = useState("");
+  const { customer, signOut } = useAuth();
+  const accountFirstName = customer?.firstName?.trim() ?? "";
 
   const [mobilePanel, setMobilePanel] =
     useState<MobileCatalogKey | null>(null);
@@ -119,62 +113,7 @@ export default function Navbar() {
     }
   }, []);
 
-  useEffect(() => {
-    function syncAccountName() {
-      try {
-        if (
-          !isFrontendSignedIn()
-        ) {
-          setAccountFirstName("");
-          return;
-        }
 
-        const account =
-          getFrontendAccount();
-
-        setAccountFirstName(
-          account?.firstName?.trim() ??
-            "",
-        );
-      } catch {
-        setAccountFirstName("");
-      }
-    }
-
-    syncAccountName();
-
-    window.addEventListener(
-      "vi2-auth-change",
-      syncAccountName,
-    );
-
-    window.addEventListener(
-      "storage",
-      syncAccountName,
-    );
-
-    window.addEventListener(
-      "focus",
-      syncAccountName,
-    );
-
-    return () => {
-      window.removeEventListener(
-        "vi2-auth-change",
-        syncAccountName,
-      );
-
-      window.removeEventListener(
-        "storage",
-        syncAccountName,
-      );
-
-      window.removeEventListener(
-        "focus",
-        syncAccountName,
-      );
-    };
-  }, []);
 
   useEffect(() => {
     function handleEscape(
@@ -1316,8 +1255,7 @@ export default function Navbar() {
                 type="button"
                 className={styles.drawerCta}
                 onClick={() => {
-                  signOutFrontend();
-                  setAccountFirstName("");
+                  signOut();
                   closeMenu();
 
                   window.location.href = "/";
@@ -1436,7 +1374,6 @@ export default function Navbar() {
       />
 
       <MobileBottomNav
-        isArabic={isArabic}
         onOpenSearch={openSearch}
       />
     </>

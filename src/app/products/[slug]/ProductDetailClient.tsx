@@ -31,7 +31,6 @@ import {
 import ProductSocialProof from "@/components/ProductSocialProof";
 import ProductValueOffer from "@/components/ProductValueOffer";
 import { useCart } from "@/context/CartContext";
-import { products } from "@/data/products";
 import {
   getProductForm,
   getProductHealthGoals,
@@ -74,8 +73,10 @@ type AccordionKey =
 
 export default function ProductDetailClient({
   product,
+  allProducts,
 }: {
   product: Product;
+  allProducts: Product[];
 }) {
   const router = useRouter();
   const { addItem } = useCart();
@@ -150,7 +151,7 @@ export default function ProductDetailClient({
       : null;
 
   const sameCategory =
-    products
+    allProducts
       .filter(
         (item) =>
           item.slug !==
@@ -167,7 +168,7 @@ export default function ProductDetailClient({
       );
 
   const fallbackProducts =
-    products
+    allProducts
       .filter(
         (item) =>
           item.slug !==

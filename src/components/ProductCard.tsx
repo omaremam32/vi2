@@ -38,13 +38,30 @@ export default function ProductCard({
           </span>
         )}
 
-        <Image
-          src={product.image}
-          alt={product.name}
-          width={700}
-          height={800}
-          className={styles.image}
-        />
+        {product.image ? (
+          <Image
+            src={product.image}
+            alt={product.name}
+            width={700}
+            height={800}
+            className={styles.image}
+          />
+        ) : (
+          <div
+            className={styles.image}
+            style={{
+              background: "#f0ece4",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              fontSize: "0.6rem",
+              letterSpacing: "0.12em",
+              color: "#aaa",
+            }}
+          >
+            NO IMAGE
+          </div>
+        )}
       </Link>
 
       <div className={styles.content}>

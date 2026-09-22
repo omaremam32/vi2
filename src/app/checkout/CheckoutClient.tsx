@@ -15,6 +15,7 @@ import {
   WalletCards,
 } from "lucide-react";
 import {
+  useEffect,
   useMemo,
   useRef,
   useState,
@@ -25,7 +26,8 @@ import {
 } from "next/navigation";
 
 import { useCart } from "@/context/CartContext";
-import { getProductBySlug } from "@/data/products";
+import { services } from "@/services";
+import type { ShippingOption } from "@/domain/shipping";
 import type { Product } from "@/types/product";
 
 import styles from "./Checkout.module.css";
@@ -143,7 +145,31 @@ export default function CheckoutClient() {
   const {
     items,
     clearCart,
+    cartId,
+    promotions,
+    applyPromotion,
+    removePromotion,
+    discountTotal,
   } = useCart();
+
+  const [shippingOptions, setShippingOptions] = useState<ShippingOption[]>([]);
+  const [selectedShippingOptionId, setSelectedShippingOptionId] = useState<string>("");
+  const [promoInput, setPromoInput] = useState("");
+  const [promoMsg, setPromoMsg] = useState<{ type: "success" | "error"; text: string } | null>(null);
+  const [promoLoading, setPromoLoading] = useState(false);
+
+  useEffect(() => {
+    if (!cartId) return;
+    services.shippingService
+      .getShippingOptionsForCart(cartId)
+      .then((opts) => {
+        setShippingOptions(opts);
+        if (opts.length > 0 && !selectedShippingOptionId) {
+          setSelectedShippingOptionId(opts[0].id);
+        }
+      })
+      .catch(() => {});
+  }, [cartId]);
 
   const buyNowSlug =
     searchParams.get("buyNow");
@@ -154,12 +180,45 @@ export default function CheckoutClient() {
         "1",
     );
 
-  const buyNowProduct =
-    buyNowSlug
-      ? getProductBySlug(
-          buyNowSlug,
-        )
-      : undefined;
+  const [buyNowProduct, setBuyNowProduct] =
+    useState<Product | undefined>(undefined);
+
+  // Fetch buyNow product from Medusa (async) instead of local data
+  useEffect(() => {
+    if (!buyNowSlug) return;
+    fetch(
+      `${process.env.NEXT_PUBLIC_MEDUSA_BACKEND_URL || "http://localhost:9000"}/store/products?handle=${encodeURIComponent(buyNowSlug)}&fields=id,handle,title,thumbnail,metadata,variants.id,variants.prices`,
+      {
+        headers: {
+          "x-publishable-api-key":
+            process.env.NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY || "",
+        },
+      }
+    )
+      .then((r) => r.json())
+      .then((data) => {
+        const p = data.products?.[0];
+        if (!p) return;
+        const variant = p.variants?.[0];
+        const priceRaw = variant?.prices?.[0]?.amount ?? 0;
+        setBuyNowProduct({
+          id: p.id,
+          slug: p.handle,
+          variantId: variant?.id,
+          brand: String(p.metadata?.brand ?? "Vi2"),
+          name: p.title,
+          shortName: String(p.metadata?.shortName ?? p.title),
+          category: String(p.metadata?.category ?? ""),
+          description: p.description ?? "",
+          price: priceRaw / 100,
+          rating: Number(p.metadata?.rating ?? 0),
+          reviewCount: Number(p.metadata?.reviewCount ?? 0),
+          image: p.thumbnail ?? "",
+          stock: Number(p.metadata?.stock ?? 99),
+        });
+      })
+      .catch(() => {});
+  }, [buyNowSlug]);
 
   const buyNowQuantity =
     Number.isFinite(
@@ -212,14 +271,16 @@ export default function CheckoutClient() {
     [checkoutItems],
   );
 
-  const delivery =
-    subtotal >= 2500 ||
-    subtotal === 0
+  const selectedOption = shippingOptions.find(
+    (o) => o.id === selectedShippingOptionId,
+  );
+  const delivery = selectedOption
+    ? selectedOption.amount
+    : subtotal >= 2500 || subtotal === 0
       ? 0
       : 85;
 
-  const total =
-    subtotal + delivery;
+  const total = Math.max(0, subtotal + delivery - discountTotal);
 
   const amountUntilFreeDelivery =
     Math.max(
@@ -372,9 +433,7 @@ export default function CheckoutClient() {
   }
 
   async function placeOrder() {
-    if (
-      !validateDetails()
-    ) {
+    if (!validateDetails()) {
       setStep(1);
       scrollToTop();
       return;
@@ -383,174 +442,95 @@ export default function CheckoutClient() {
     setSubmitting(true);
     setError("");
 
-    const orderPayload = {
-      customer: {
-        name:
-          form.name.trim(),
-
-        phone:
-          normalizeEgyptPhone(
-            form.phone,
-          ),
-
-        email:
-          form.email.trim(),
-
-        governorate:
-          form.governorate,
-
-        area:
-          form.area.trim(),
-
-        address:
-          form.address.trim(),
-
-        notes:
-          form.notes.trim(),
-      },
-
-      paymentMethod,
-
-      subtotal,
-      delivery,
-      total,
-
-      items:
-        checkoutItems.map(
-          (
-            item,
-          ) => ({
-            id:
-              item.product.id,
-
-            slug:
-              item.product.slug,
-
-            name:
-              item.product.name,
-
-            brand:
-              item.product.brand,
-
-            image:
-              item.product.image,
-
-            price:
-              item.product.price,
-
-            quantity:
-              item.quantity,
-          }),
-        ),
-    };
-
     try {
-      const response =
-        await fetch(
-          "/api/orders",
-          {
-            method:
-              "POST",
-
-            headers: {
-              "Content-Type":
-                "application/json",
-            },
-
-            body:
-              JSON.stringify(
-                orderPayload,
-              ),
-          },
-        );
-
-      const responseText =
-        await response.text();
-
-      let result: {
-        error?: string;
-
-        order?: {
-          reference: string;
-          status: string;
-          paymentStatus: string;
-          createdAt: string;
-        };
-      } = {};
-
-      try {
-        result =
-          responseText
-            ? JSON.parse(
-                responseText,
-              )
-            : {};
-      } catch {
-        console.error(
-          "VI2 /api/orders returned a non-JSON response:",
-          responseText.slice(
-            0,
-            300,
-          ),
-        );
-
-        throw new Error(
-          "The order service is temporarily unavailable. Please try again.",
-        );
+      let activeCartId = cartId;
+      if (!activeCartId || buyNowProduct) {
+        const created = await services.cartService.createCart();
+        activeCartId = created.id;
+        for (const item of checkoutItems) {
+          const vId = item.product.variantId || item.product.id;
+          await services.cartService.addItem(activeCartId, vId, item.quantity);
+        }
       }
 
-      if (
-        !response.ok ||
-        !result.order
-      ) {
-        throw new Error(
-          result.error ||
-            "Could not place your order. Please try again.",
-        );
+      // 1. Set Address & Customer Email
+      const nameParts = form.name.trim().split(" ");
+      const firstName = nameParts[0] || "Customer";
+      const lastName = nameParts.slice(1).join(" ") || "-";
+
+      await services.cartService.setAddress(
+        activeCartId,
+        form.email.trim() || `guest+${Date.now()}@vi2.local`,
+        {
+          firstName,
+          lastName,
+          address1: `${form.area.trim()}, ${form.address.trim()}`,
+          city: form.governorate,
+          countryCode: "eg",
+          postalCode: "00000",
+          phone: normalizeEgyptPhone(form.phone),
+        },
+      );
+
+      // 2. Set Shipping Method if selected
+      if (selectedShippingOptionId) {
+        try {
+          await services.cartService.setShippingMethod(
+            activeCartId,
+            selectedShippingOptionId,
+          );
+        } catch (smErr) {
+          console.warn("Shipping method set skipped/failed:", smErr);
+        }
       }
+
+      // 3. Complete Cart on Medusa
+      const completion = await services.cartService.completeCart(
+        activeCartId,
+        "pp_system_default",
+      );
+
+      const reference = completion.ok
+        ? `VI2-${completion.orderId.slice(-6).toUpperCase()}`
+        : `VI2-${String(Date.now()).slice(-6)}`;
 
       window.localStorage.setItem(
         "vi2-last-order",
         JSON.stringify({
-          ...orderPayload,
-
-          reference:
-            result.order.reference,
-
-          createdAt:
-            result.order.createdAt,
-
-          orderStatus:
-            result.order.status,
-
-          paymentStatus:
-            result.order.paymentStatus,
+          reference,
+          orderId: completion.ok ? completion.orderId : undefined,
+          createdAt: new Date().toISOString(),
+          customer: form,
+          paymentMethod,
+          subtotal,
+          delivery,
+          discountTotal,
+          total,
+          items: checkoutItems.map((item) => ({
+            id: item.product.id,
+            slug: item.product.slug,
+            name: item.product.name,
+            brand: item.product.brand,
+            image: item.product.image,
+            price: item.product.price,
+            quantity: item.quantity,
+            variantId: item.product.variantId,
+          })),
         }),
       );
 
       if (!buyNowProduct) {
-        clearCart();
+        await clearCart();
       }
 
-      router.push(
-        `/order/success?order=${encodeURIComponent(
-          result.order.reference,
-        )}`,
-      );
-    } catch (
-      submitError
-    ) {
-      console.error(
-        "VI2 checkout submit error:",
-        submitError,
-      );
-
+      router.push(`/order/success?order=${encodeURIComponent(reference)}`);
+    } catch (submitError) {
+      console.error("VI2 checkout submit error:", submitError);
       setError(
         submitError instanceof Error
           ? submitError.message
           : "Could not place your order. Please try again.",
       );
-
       setSubmitting(false);
     }
   }
@@ -1546,24 +1526,55 @@ export default function CheckoutClient() {
                       }
                     >
                       <span>
-                        DELIVERY
+                        DELIVERY OPTION
                       </span>
 
-                      <strong>
-                        Standard
-                        Delivery
-                      </strong>
+                      {shippingOptions.length > 0 ? (
+                        <div style={{ display: "flex", flexDirection: "column", gap: "8px", marginTop: "8px" }}>
+                          {shippingOptions.map((opt) => (
+                            <label
+                              key={opt.id}
+                              style={{
+                                display: "flex",
+                                alignItems: "center",
+                                justifyContent: "space-between",
+                                padding: "8px 10px",
+                                border: selectedShippingOptionId === opt.id ? "1.5px solid #111" : "1px solid #e5e5e5",
+                                background: selectedShippingOptionId === opt.id ? "#fafafa" : "#fff",
+                                cursor: "pointer",
+                              }}
+                            >
+                              <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                                <input
+                                  type="radio"
+                                  name="shippingOption"
+                                  checked={selectedShippingOptionId === opt.id}
+                                  onChange={() => setSelectedShippingOptionId(opt.id)}
+                                />
+                                <span style={{ fontSize: "12px", fontWeight: 600 }}>{opt.name}</span>
+                              </div>
+                              <strong style={{ fontSize: "12px" }}>
+                                {opt.amount === 0 ? "FREE" : `${formatPrice(opt.amount)} EGP`}
+                              </strong>
+                            </label>
+                          ))}
+                        </div>
+                      ) : (
+                        <>
+                          <strong>
+                            Standard
+                            Delivery
+                          </strong>
 
-                      <p>
-                        {delivery ===
-                        0
-                          ? "Free delivery"
-                          : `${formatPrice(
-                              delivery,
-                            )} EGP`}
-                        <br />
-                        Across Egypt
-                      </p>
+                          <p>
+                            {delivery === 0
+                              ? "Free delivery"
+                              : `${formatPrice(delivery)} EGP`}
+                            <br />
+                            Across Egypt
+                          </p>
+                        </>
+                      )}
                     </div>
 
                     <div
@@ -1822,6 +1833,59 @@ export default function CheckoutClient() {
                   </div>
                 )}
 
+              {/* PROMO / DISCOUNT CODE BOX */}
+              <div style={{ padding: "16px 0", borderTop: "1px solid #e5e5e5", borderBottom: "1px solid #e5e5e5", margin: "16px 0" }}>
+                <span style={{ fontSize: "11px", fontWeight: 800, letterSpacing: "0.1em", display: "block", marginBottom: "8px", color: "#666" }}>
+                  PROMO CODE
+                </span>
+                <div style={{ display: "flex", gap: "6px" }}>
+                  <input
+                    type="text"
+                    placeholder="ENTER CODE"
+                    value={promoInput}
+                    onChange={(e) => setPromoInput(e.target.value.toUpperCase())}
+                    style={{ flex: 1, padding: "8px 10px", border: "1px solid #ccc", fontSize: "12px", textTransform: "uppercase" }}
+                  />
+                  <button
+                    type="button"
+                    disabled={promoLoading || !promoInput.trim()}
+                    onClick={async () => {
+                      if (!promoInput.trim()) return;
+                      setPromoLoading(true);
+                      setPromoMsg(null);
+                      const res = await applyPromotion(promoInput.trim());
+                      setPromoLoading(false);
+                      if (res.ok) {
+                        setPromoMsg({ type: "success", text: "Promotion applied!" });
+                        setPromoInput("");
+                      } else {
+                        setPromoMsg({ type: "error", text: res.message || "Invalid promotion code." });
+                      }
+                    }}
+                    style={{ padding: "8px 14px", background: "#111", color: "#fff", border: "none", fontSize: "11px", fontWeight: 800, cursor: "pointer" }}
+                  >
+                    {promoLoading ? "..." : "APPLY"}
+                  </button>
+                </div>
+                {promoMsg && (
+                  <p style={{ fontSize: "11px", marginTop: "6px", color: promoMsg.type === "success" ? "#16a34a" : "#dc2626" }}>
+                    {promoMsg.text}
+                  </p>
+                )}
+                {promotions.map((p) => (
+                  <div key={p.code} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: "8px", fontSize: "12px", background: "#f5f5f5", padding: "6px 10px" }}>
+                    <span>🎟️ <strong>{p.code}</strong></span>
+                    <button
+                      type="button"
+                      onClick={() => removePromotion(p.code)}
+                      style={{ background: "none", border: "none", color: "#dc2626", cursor: "pointer", fontSize: "11px", fontWeight: 700 }}
+                    >
+                      REMOVE
+                    </button>
+                  </div>
+                ))}
+              </div>
+
               <div
                 className={
                   styles.totals
@@ -1839,6 +1903,21 @@ export default function CheckoutClient() {
                     EGP
                   </strong>
                 </div>
+
+                {discountTotal > 0 && (
+                  <div style={{ color: "#16a34a" }}>
+                    <span>
+                      Discount
+                    </span>
+
+                    <strong>
+                      -{formatPrice(
+                        discountTotal,
+                      )}{" "}
+                      EGP
+                    </strong>
+                  </div>
+                )}
 
                 <div>
                   <span>

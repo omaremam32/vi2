@@ -2,6 +2,7 @@
 
 import type { ReactNode } from "react";
 
+import { AuthProvider } from "@/context/AuthContext";
 import { CartProvider } from "@/context/CartContext";
 import { LanguageProvider } from "@/context/LanguageContext";
 
@@ -12,7 +13,9 @@ export default function Providers({
 }) {
   return (
     <LanguageProvider>
-      <CartProvider>{children}</CartProvider>
+      <AuthProvider>
+        <CartProvider>{children}</CartProvider>
+      </AuthProvider>
     </LanguageProvider>
   );
 }

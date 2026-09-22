@@ -1,11 +1,14 @@
 import { Suspense } from "react";
 
+import { getMedusaProducts } from "@/lib/medusa-products";
 import ShopClient from "./ShopClient";
 
-export default function ShopPage() {
+export default async function ShopPage() {
+  const products = await getMedusaProducts();
+
   return (
     <Suspense fallback={<ShopLoading />}>
-      <ShopClient />
+      <ShopClient products={products} />
     </Suspense>
   );
 }

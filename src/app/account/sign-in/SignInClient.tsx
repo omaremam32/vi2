@@ -22,117 +22,50 @@ import {
   useSearchParams,
 } from "next/navigation";
 
-import {
-  getFrontendAccount,
-  isFrontendSignedIn,
-  signInFrontend,
-} from "@/lib/frontendAuth";
+import { useAuth } from "@/context/AuthContext";
 
 import styles from "../AccountAuth.module.css";
 
 export default function SignInClient() {
-  const router =
-    useRouter();
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const { signIn, isAuthenticated } = useAuth();
 
-  const searchParams =
-    useSearchParams();
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
 
-  const [
-    email,
-    setEmail,
-  ] = useState("");
-
-  const [
-    password,
-    setPassword,
-  ] = useState("");
-
-  const [
-    showPassword,
-    setShowPassword,
-  ] = useState(false);
-
-  const [
-    loading,
-    setLoading,
-  ] = useState(false);
-
-  const [
-    error,
-    setError,
-  ] = useState("");
-
-  const [
-    success,
-    setSuccess,
-  ] = useState("");
-
-  const next =
-    searchParams.get(
-      "next",
-    ) || "/account";
+  const next = searchParams.get("next") || "/account";
 
   useEffect(() => {
-    if (
-      isFrontendSignedIn()
-    ) {
-      router.replace(
-        next,
-      );
-      return;
+    if (isAuthenticated) {
+      router.replace(next);
     }
+  }, [isAuthenticated, next, router]);
 
-    const account =
-      getFrontendAccount();
-
-    if (account?.email) {
-      setEmail(
-        account.email,
-      );
-    }
-  }, [
-    next,
-    router,
-  ]);
-
-  async function submit(
-    event: FormEvent,
-  ) {
+  async function submit(event: FormEvent) {
     event.preventDefault();
 
     setError("");
     setSuccess("");
 
-    if (
-      !email.trim() ||
-      !password
-    ) {
-      setError(
-        "Enter your email and password.",
-      );
+    if (!email.trim() || !password) {
+      setError("Enter your email and password.");
       return;
     }
 
     setLoading(true);
 
-    await new Promise(
-      (resolve) =>
-        window.setTimeout(
-          resolve,
-          450,
-        ),
-    );
-
-    const result =
-      signInFrontend(
-        email,
-      );
+    const result = await signIn({
+      email: email.trim(),
+      password,
+    });
 
     if (!result.ok) {
-      setError(
-        result.message ??
-          "Could not sign in.",
-      );
+      setError(result.message ?? "Invalid email or password.");
       setLoading(false);
       return;
     }

@@ -49,12 +49,6 @@ export default function RootLayout({
       data-scroll-behavior="smooth"
     >
       <head>
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-        <link
-          href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Cairo:wght@400;500;600;700;800;900&family=Inter:wght@400;500;600;700;800&display=swap"
-          rel="stylesheet"
-        />
         <Script id="vi2-language-init" strategy="beforeInteractive">
           {`
             try {
@@ -62,6 +56,9 @@ export default function RootLayout({
               document.documentElement.lang = language;
               document.documentElement.dir = language === "ar" ? "rtl" : "ltr";
               document.body && (document.body.dataset.locale = language);
+              if (language === "ar") {
+                document.documentElement.style.opacity = "0";
+              }
             } catch (error) {}
           `}
         </Script>

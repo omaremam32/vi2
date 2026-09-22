@@ -2,6 +2,9 @@ export type Product = {
   id: string;
   slug: string;
 
+  // Medusa variant ID — used when adding to Medusa cart
+  variantId?: string;
+
   brand: string;
   name: string;
   shortName: string;
